@@ -53,15 +53,18 @@
           {% csrf_token %}
           <input type="hidden" name="scope" value="{{ scope }}" />
           <input type="hidden" name="period" value="{{ period }}" />
-          <input name="item" value="{{ r.item }}" maxlength="128"
-                 class="min-w-0 w-full bg-transparent px-1 text-sm border-b border-transparent hover:border-slate-600 focus:border-neutral-400 focus:outline-none" />
-          <select name="category" class="min-w-0 bg-transparent text-sm border-b border-transparent hover:border-slate-600 focus:outline-none">
+          <div class="flex items-center gap-1 min-w-0">
+            {% if scope == 'month' %}<span class="record-day w-5 shrink-0 text-left text-xs text-neutral-500">{{ r.date.day }}</span>{% endif %}
+            <input name="item" value="{{ r.item }}" maxlength="128"
+                   class="min-w-0 w-full bg-transparent px-1 text-xs border-b border-transparent hover:border-slate-600 focus:border-neutral-400 focus:outline-none" />
+          </div>
+          <select name="category" class="min-w-0 bg-transparent text-xs border-b border-transparent hover:border-slate-600 focus:outline-none">
             {% for c in categories %}
               <option value="{{ c.id }}" class="bg-slate-800 text-neutral-100" {% if c.id == r.category_id %}selected{% endif %}>{{ c.name }}</option>
             {% endfor %}
           </select>
           <input name="amount" type="number" min="0.01" step="0.01" value="{{ r.amount|floatformat:2 }}"
-                 class="min-w-0 w-full bg-transparent px-1 text-sm border-b border-transparent hover:border-slate-600 focus:border-neutral-400 focus:outline-none" />
+                 class="min-w-0 w-full bg-transparent px-1 text-xs border-b border-transparent hover:border-slate-600 focus:border-neutral-400 focus:outline-none" />
         </form>
         <details class="relative text-right">
           <summary class="cursor-pointer list-none text-neutral-400 px-1" title="Options">⋮</summary>

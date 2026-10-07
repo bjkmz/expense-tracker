@@ -211,9 +211,19 @@ class RecordsPanelTests(TestCase):
             self.assertNotIn('w-48', body)
             self.assertIn('absolute right-0 top-full', body)
             self.assertIn('grid-cols-[1fr_75px_60px_30px]', body)
-            self.assertNotIn('1fr_75px_60px_30px', body)
+            self.assertNotIn('1fr_110px_80px_36px', body)
         day_body = self.client.get('/day/2026-04-15/').content.decode()
         self.assertIn("#records-list details[open]", day_body)
+
+    def test_month_rows_show_day_numbers_ascending(self):
+        import re
+        month_body = self.client.get('/month/2026-04/').content.decode()
+        days = [int(n) for n in re.findall(r'record-day[^"]*">(\d+)<', month_body)]
+        self.assertTrue(days)
+        self.assertEqual(days, sorted(days))
+        self.assertEqual(days[0], min(days))
+        day_body = self.client.get('/day/2026-04-15/').content.decode()
+        self.assertNotIn('record-day', day_body)
 
     def test_insights_graph_is_sticky_half_viewport(self):
         for url in ('/day/2026-04-15/', '/month/2026-04/'):
