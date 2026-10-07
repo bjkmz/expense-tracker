@@ -375,13 +375,6 @@ def _insights_ctx(scope: str, period: str, chart_type: str = 'line', sort: str =
     ins = insights_for(scope, period, sort)
     chart_html, from_cache = get_chart_html(scope, period, chart_type)
     flipped = 'pie' if chart_type == 'line' else 'line'
-    # tab links: day tab -> day page for same date (or first of month), month tab -> month page
-    if scope == 'day':
-        day_url = f'/day/{period}/'
-        month_url = f'/month/{period[:7]}/'
-    else:
-        day_url = f'/day/{period}-01/'
-        month_url = f'/month/{period}/'
     return {
         'ins_scope': scope,
         'ins_period': period,
@@ -390,8 +383,6 @@ def _insights_ctx(scope: str, period: str, chart_type: str = 'line', sort: str =
         'chart_flipped': flipped,
         'chart_html': chart_html,
         'chart_cached': from_cache,
-        'day_url': day_url,
-        'month_url': month_url,
     }
 
 

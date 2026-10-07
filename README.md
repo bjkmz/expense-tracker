@@ -55,7 +55,7 @@ April-2026 anchors (Rice x12, Jeepney x20, bonus 99999.99, Cabinet spike).
 - **Records panel** — date head with chevrons around the label,
   SUMMARY (net + per-category totals, `0.00` if none), inline add row, rows with
   in-place editing, and a three-dot menu per row (Move to new date / Delete).
-- **Insights panel** — Day/Month tabs, line/pie toggle, category totals, insight
+- **Insights panel** — line/pie toggle, category totals, insight
   cards (Highest Income, Top Food/Transpo by record count, costliest
   Consumable/Ownership/Miscellaneous), and sortable daily/monthly rows
   (Expense and Income ascending/descending; Filter is a disabled placeholder).

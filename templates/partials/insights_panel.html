@@ -1,11 +1,5 @@
-{# Insights panel (light). Expects: ins_scope, ins_period, ins, chart_type, chart_flipped, chart_html, day_url, month_url. #}
+{# Insights panel (light). Expects: ins_scope, ins_period, ins, chart_type, chart_flipped, chart_html. #}
 <div id="insights-panel" data-scope="{{ ins_scope }}" data-period="{{ ins_period }}" class="bg-white text-neutral-800 flex flex-col">
-  {# Day / Month tabs #}
-  <div class="flex gap-2 px-3 pt-3">
-    <a href="{{ day_url }}" class="flex-1 text-center border rounded py-1 text-sm {% if ins_scope == 'day' %}bg-neutral-900 text-white{% endif %}">DAY</a>
-    <a href="{{ month_url }}" class="flex-1 text-center border rounded py-1 text-sm {% if ins_scope == 'month' %}bg-neutral-900 text-white{% endif %}">MONTH</a>
-  </div>
-
   {# Chart with Line<->Pie toggle chevron #}
   <div class="relative m-3 border rounded min-h-[220px]">
     <button class="absolute right-2 top-2 z-10 border rounded px-2 text-slate-500" title="Toggle Line/Pie"
