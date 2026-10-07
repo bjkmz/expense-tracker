@@ -4,6 +4,9 @@
   <span class="font-semibold">{{ ym_label }}</span>
   <button class="px-2 text-neutral-400" hx-get="{% url 'calendar-day' %}?ym={{ next_ym }}" hx-target="closest [data-cal]" hx-swap="innerHTML">›</button>
 </div>
+<div class="grid grid-cols-7 gap-px bg-black/60 text-center text-[9px] text-neutral-400">
+  <div class="bg-neutral-800 py-1">Su</div><div class="bg-neutral-800 py-1">Mo</div><div class="bg-neutral-800 py-1">Tu</div><div class="bg-neutral-800 py-1">We</div><div class="bg-neutral-800 py-1">Th</div><div class="bg-neutral-800 py-1">Fr</div><div class="bg-neutral-800 py-1">Sa</div>
+</div>
 <div class="grid grid-cols-7 gap-px bg-black/60">
   {% for c in cells %}
     {% if c is None %}

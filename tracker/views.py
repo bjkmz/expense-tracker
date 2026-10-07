@@ -74,9 +74,13 @@ def calendar_day(request):
     )
     by_date = {r['date'].isoformat(): r for r in per_day}
     stats = get_heatmap_stats()
-    num_days = cal_module.monthrange(y, m)[1]
+    first_weekday, num_days = cal_module.monthrange(y, m)
 
     cells = []
+    # Sunday-start alignment: leading blanks so day 1 lands under correct weekday.
+    leading = (first_weekday + 1) % 7
+    for _ in range(leading):
+        cells.append(None)
     for d in range(1, num_days + 1):
         d_iso = f'{y:04d}-{m:02d}-{d:02d}'
         r = by_date.get(d_iso, {})
@@ -92,7 +96,7 @@ def calendar_day(request):
                 'flag': highlight_day(expense, stats, is_today=(d_iso == today.isoformat())),
             }
         )
-    # pad to full weeks (sequential 7-col grid like sketches)
+    # pad to full weeks (Sunday-start 7-col calendar grid)
     while len(cells) % 7:
         cells.append(None)
 
