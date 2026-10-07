@@ -66,6 +66,26 @@
       if (window.location.pathname !== target) window.location = target;
       el.value = el.defaultValue;
     }
+    // Insights graph: the fused graph+summary card is h-[50vh] but Plotly
+    // renders at its own layout size, so relayout every figure to the chart
+    // box (flex-1 remainder after the summary). Runs on load, debounced
+    // resize, and after any HTMX settle (line/pie toggle re-renders
+    // #insights-chart). No-ops when Plotly or the chart is absent.
+    var _fitChartsT = null;
+    function fitInsightCharts() {
+      if (!window.Plotly) return;
+      var box = document.getElementById('insights-chart-box');
+      if (!box) return;
+      document.querySelectorAll('#insights-chart .plotly-graph-div').forEach(function (gd) {
+        try { window.Plotly.relayout(gd, {width: box.clientWidth, height: box.clientHeight}); } catch (e) {}
+      });
+    }
+    window.addEventListener('load', fitInsightCharts);
+    window.addEventListener('resize', function () {
+      if (_fitChartsT) clearTimeout(_fitChartsT);
+      _fitChartsT = setTimeout(fitInsightCharts, 150);
+    });
+    document.addEventListener('htmx:afterSettle', fitInsightCharts);
     // Home Add Record modal: on server-confirmed save, close + toast + refresh calendars.
     // The server sends HX-Trigger: record-created only on success; errors stay in #add-error.
     document.addEventListener('htmx:afterRequest', function (e) {

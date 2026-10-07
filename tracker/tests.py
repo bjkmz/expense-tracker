@@ -181,6 +181,14 @@ class RecordsPanelTests(TestCase):
             self.assertIn('lg:w-1/2', body)
             self.assertIn('overflow-x-clip', body)
 
+    def test_insights_graph_is_sticky_half_viewport(self):
+        for url in ('/day/2026-04-15/', '/month/2026-04/'):
+            body = self.client.get(url).content.decode()
+            self.assertIn('sticky top-1', body)
+            self.assertIn('h-[50vh]', body)
+            self.assertIn('insights-chart-box', body)
+            self.assertIn('fitInsightCharts', body)
+
     def test_create_update_move_delete_roundtrip(self):
         # create
         r = self.client.post(
