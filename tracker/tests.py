@@ -181,6 +181,14 @@ class RecordsPanelTests(TestCase):
             self.assertIn('lg:w-1/2', body)
             self.assertIn('overflow-x-clip', body)
 
+    def test_records_column_runs_slate_to_bottom(self):
+        # Middle column carries bg-slate-900 + flex-col and the panel claims
+        # it via flex-1, so the dark field reaches page bottom on short lists
+        for url in ('/day/2026-04-15/', '/month/2026-04/'):
+            body = self.client.get(url).content.decode()
+            self.assertIn('lg:w-1/4 bg-slate-900 flex flex-col', body)
+            self.assertIn('flex flex-col flex-1 min-h-[60vh]', body)
+
     def test_insights_graph_is_sticky_half_viewport(self):
         for url in ('/day/2026-04-15/', '/month/2026-04/'):
             body = self.client.get(url).content.decode()

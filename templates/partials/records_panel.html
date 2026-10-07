@@ -1,5 +1,5 @@
 {# Records panel (dark). Root id swapped by HTMX on every mutation. #}
-<div id="records-panel" data-scope="{{ scope }}" data-period="{{ period }}" class="bg-slate-900 text-neutral-100 flex flex-col min-h-[60vh]">
+<div id="records-panel" data-scope="{{ scope }}" data-period="{{ period }}" class="bg-slate-900 text-neutral-100 flex flex-col flex-1 min-h-[60vh]">
   {% if error %}
     <div class="m-3 px-3 py-2 rounded bg-red-900 text-red-100 text-sm">{{ error }}</div>
   {% endif %}
