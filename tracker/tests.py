@@ -200,6 +200,19 @@ class RecordsPanelTests(TestCase):
             self.assertEqual(pos, sorted(pos))
             self.assertRegex(body, r'<option[^>]*class="bg-slate-800 text-neutral-100"')
 
+    def test_move_form_collapsed_behind_disclosure(self):
+        # Row menu shows Move summary only; date picker + confirm spawn inside
+        for url in ('/day/2026-04-15/', '/month/2026-04/'):
+            body = self.client.get(url).content.decode()
+            self.assertIn('title="Move to date">Move</summary>', body)
+            self.assertIn('name="new_date"', body)
+            self.assertIn('title="Confirm move"', body)
+            self.assertIn('w-max min-w-20', body)
+            self.assertNotIn('w-48', body)
+            self.assertIn('absolute right-0 top-full', body)
+        day_body = self.client.get('/day/2026-04-15/').content.decode()
+        self.assertIn("#records-list details[open]", day_body)
+
     def test_insights_graph_is_sticky_half_viewport(self):
         for url in ('/day/2026-04-15/', '/month/2026-04/'):
             body = self.client.get(url).content.decode()

@@ -65,15 +65,20 @@
         </form>
         <details class="relative text-right">
           <summary class="cursor-pointer list-none text-neutral-400 px-1" title="Options">⋮</summary>
-          <div class="absolute right-0 z-10 mt-1 w-48 rounded bg-slate-800 border border-slate-700 p-2 text-left shadow-xl">
-            <form hx-post="{% url 'record-move' r.id %}" hx-target="#records-panel" hx-swap="outerHTML" class="flex gap-1 mb-2">
-              {% csrf_token %}
-              <input type="hidden" name="scope" value="{{ scope }}" />
-              <input type="hidden" name="period" value="{{ period }}" />
-              <input type="date" name="new_date" value="{{ r.date|date:'Y-m-d' }}" required
-                     class="flex-1 min-w-0 bg-slate-900 border border-slate-700 rounded px-1 text-xs" />
-              <button class="text-xs border rounded px-2" title="Change date">Move</button>
-            </form>
+          <div class="absolute right-0 z-10 mt-1 w-max min-w-20 rounded bg-slate-800 border border-slate-700 p-2 text-left shadow-xl">
+            <details class="relative mb-2">
+              <summary class="cursor-pointer list-none text-xs px-1 py-1" title="Move to date">Move</summary>
+              <div class="absolute right-0 top-full mt-1 z-20 w-max rounded bg-slate-800 border border-slate-700 p-2 shadow-xl">
+                <form hx-post="{% url 'record-move' r.id %}" hx-target="#records-panel" hx-swap="outerHTML" class="flex gap-1">
+                  {% csrf_token %}
+                  <input type="hidden" name="scope" value="{{ scope }}" />
+                  <input type="hidden" name="period" value="{{ period }}" />
+                  <input type="date" name="new_date" value="{{ r.date|date:'Y-m-d' }}" required
+                         class="flex-1 min-w-0 bg-slate-900 border border-slate-700 rounded px-1 text-xs" />
+                  <button class="text-xs border rounded px-2" title="Confirm move">✓</button>
+                </form>
+              </div>
+            </details>
             <form hx-post="{% url 'record-delete' r.id %}" hx-target="#records-panel" hx-swap="outerHTML">
               {% csrf_token %}
               <input type="hidden" name="scope" value="{{ scope }}" />

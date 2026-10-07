@@ -86,6 +86,15 @@
       _fitChartsT = setTimeout(fitInsightCharts, 150);
     });
     document.addEventListener('htmx:afterSettle', fitInsightCharts);
+    // Records row menus: <details> never closes on outside click natively,
+    // so dismiss any open menu when the pointer lands outside it. Delegated
+    // on document (survives HTMX panel swaps); scoped to #records-list so
+    // the calendar modal and other disclosures are untouched.
+    document.addEventListener('click', function (e) {
+      document.querySelectorAll('#records-list details[open]').forEach(function (d) {
+        if (!d.contains(e.target)) d.removeAttribute('open');
+      });
+    });
     // Home Add Record modal: on server-confirmed save, close + toast + refresh calendars.
     // The server sends HX-Trigger: record-created only on success; errors stay in #add-error.
     document.addEventListener('htmx:afterRequest', function (e) {
