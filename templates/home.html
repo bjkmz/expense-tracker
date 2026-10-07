@@ -21,16 +21,16 @@
     </div>
   </aside>
 
-  <main class="flex-1">
-    <header class="bg-white border-b">
-      <h1 class="banner text-4xl md:text-6xl font-black text-center py-6">Ǝ%PENSE TRACKER</h1>
+  <main class="flex-1 flex flex-col min-h-screen">
+    <header class="bg-white border-b min-h-[25vh] flex items-center justify-center">
+      <h1 class="banner text-4xl md:text-6xl font-black text-center">Ǝ%PENSE TRACKER</h1>
     </header>
-    <div class="flex justify-center py-6 bg-white">
+    <div class="flex justify-center items-center min-h-[25vh] bg-white">
       <button class="rounded-2xl px-6 py-3 text-white" style="background: var(--teal)"
               onclick="document.getElementById('add-modal').showModal()">⊕ ADD RECORD</button>
     </div>
     <div id="home-toast" class="hidden mx-auto my-2 max-w-md px-4 py-2 rounded bg-green-100 text-green-800 text-sm text-center"></div>
-    <section class="bg-neutral-200 min-h-[40vh] flex items-center justify-center">
+    <section class="bg-neutral-200 min-h-[50vh] flex items-center justify-center">
       <p class="text-neutral-500">[ INSIGHTS SECTION ] — blank in P2, wired in P4 ({{ today }})</p>
     </section>
   </main>
