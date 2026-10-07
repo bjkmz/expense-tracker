@@ -50,6 +50,21 @@
         btn.title = nowOpen ? 'Hide calendar' : 'Show calendar';
       }
     }
+    // Calendar jump pickers: icon-only date/month inputs in day/month headers.
+    // Slice the picked value to the needed precision, swap the enclosing
+    // calendar grid in-panel via HTMX, then reset so re-picking fires change.
+    function jumpCalDay(el) {
+      if (!el.value) return;
+      var box = el.closest('[data-cal]');
+      if (window.htmx && box) htmx.ajax('GET', "{% url 'calendar-day' %}?ym=" + el.value.slice(0, 7), {target: box, swap: 'innerHTML'});
+      el.value = el.defaultValue;
+    }
+    function jumpCalMonth(el) {
+      if (!el.value) return;
+      var box = el.closest('[data-cal]');
+      if (window.htmx && box) htmx.ajax('GET', "{% url 'calendar-month' %}?y=" + el.value.slice(0, 4), {target: box, swap: 'innerHTML'});
+      el.value = el.defaultValue;
+    }
     // Home Add Record modal: on server-confirmed save, close + toast + refresh calendars.
     // The server sends HX-Trigger: record-created only on success; errors stay in #add-error.
     document.addEventListener('htmx:afterRequest', function (e) {

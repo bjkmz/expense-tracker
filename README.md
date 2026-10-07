@@ -49,8 +49,10 @@ April-2026 anchors (Rice x12, Jeepney x20, bonus 99999.99, Cabinet spike).
 - **Calendar** — day cells show day no. + day income/expense; month cells show
   month + totals. Green = today/this month, red = expense over 5x the all-time
   average, blue = non-zero expense under 80% of the median. Click a cell to open
-  `/day/<YYYY-MM-DD>/` or `/month/<YYYY-MM>/`.
-- **Records panel** — date head with chevrons plus jump-to-date/month input,
+   `/day/<YYYY-MM-DD>/` or `/month/<YYYY-MM>/`. Calendar headers carry an
+   icon-only jump picker (date picker on Day, month/year picker on Month) ahead
+   of the label.
+- **Records panel** — date head with chevrons around the label,
   SUMMARY (net + per-category totals, `0.00` if none), inline add row, rows with
   in-place editing, and a three-dot menu per row (Move to new date / Delete).
 - **Insights panel** — Day/Month tabs, line/pie toggle, category totals, insight
