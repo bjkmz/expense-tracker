@@ -18,35 +18,35 @@
 
   {# Insight cards #}
   <div class="text-sm">
-    <div class="flex justify-between px-4 py-4 bg-violet-50 border-b">
+    <div class="grid grid-cols-[1fr_auto_1fr] items-baseline px-4 py-4 bg-violet-50 border-b">
       <span class="text-slate-500">Highest Income</span>
-      <span class="font-medium">{{ ins.cards.highest_income.amount|floatformat:2 }}</span>
-      <span class="text-slate-500">{% if ins.cards.highest_income.when %}{% if ins_scope == 'month' %}{{ ins.cards.highest_income.when|date:"F Y" }}{% else %}{{ ins.cards.highest_income.when|date:"M d" }}{% endif %}{% else %}–{% endif %}</span>
+      <span class="font-medium text-center">{{ ins.cards.highest_income.amount|floatformat:2 }}</span>
+      <span class="text-slate-500 text-right">{% if ins.cards.highest_income.when %}{% if ins_scope == 'month' %}{{ ins.cards.highest_income.when|date:"F Y" }}{% else %}{{ ins.cards.highest_income.when|date:"M d" }}{% endif %}{% else %}–{% endif %}</span>
     </div>
-    <div class="flex justify-between px-4 py-4 bg-rose-50 border-b">
+    <div class="grid grid-cols-[1fr_auto_1fr] items-baseline px-4 py-4 bg-rose-50 border-b">
       <span class="text-slate-500">Top Food</span>
-      <span class="font-medium">{{ ins.cards.top_food.item }}</span>
-      <span class="text-slate-500">{{ ins.cards.top_food.count }} records</span>
+      <span class="font-medium text-center">{{ ins.cards.top_food.item }}</span>
+      <span class="text-slate-500 text-right">{{ ins.cards.top_food.count }} records</span>
     </div>
-    <div class="flex justify-between px-4 py-4 bg-green-50 border-b">
+    <div class="grid grid-cols-[1fr_auto_1fr] items-baseline px-4 py-4 bg-green-50 border-b">
       <span class="text-slate-500">Top Transpo</span>
-      <span class="font-medium">{{ ins.cards.top_transpo.item }}</span>
-      <span class="text-slate-500">{{ ins.cards.top_transpo.count }} records</span>
+      <span class="font-medium text-center">{{ ins.cards.top_transpo.item }}</span>
+      <span class="text-slate-500 text-right">{{ ins.cards.top_transpo.count }} records</span>
     </div>
-    <div class="flex justify-between px-4 py-4 bg-amber-50 border-b">
+    <div class="grid grid-cols-[1fr_auto_1fr] items-baseline px-4 py-4 bg-amber-50 border-b">
       <span class="text-slate-500">Most Costly Consumable</span>
-      <span class="font-medium">{% if ins.cards.costly_consumable %}{{ ins.cards.costly_consumable.item }} {{ ins.cards.costly_consumable.amount|floatformat:0 }}{% else %}–{% endif %}</span>
-      <span class="text-slate-500">{% if ins.cards.costly_consumable %}{% if ins_scope == 'month' %}{{ ins.cards.costly_consumable.date|date:"F Y" }}{% else %}{{ ins.cards.costly_consumable.date|date:"M d" }}{% endif %}{% else %}–{% endif %}</span>
+      <span class="font-medium text-center">{% if ins.cards.costly_consumable %}{{ ins.cards.costly_consumable.item }} {{ ins.cards.costly_consumable.amount|floatformat:0 }}{% else %}–{% endif %}</span>
+      <span class="text-slate-500 text-right">{% if ins.cards.costly_consumable %}{% if ins_scope == 'month' %}{{ ins.cards.costly_consumable.date|date:"F Y" }}{% else %}{{ ins.cards.costly_consumable.date|date:"M d" }}{% endif %}{% else %}–{% endif %}</span>
     </div>
-    <div class="flex justify-between px-4 py-4 bg-teal-50 border-b">
+    <div class="grid grid-cols-[1fr_auto_1fr] items-baseline px-4 py-4 bg-teal-50 border-b">
       <span class="text-slate-500">Most Costly Ownership</span>
-      <span class="font-medium">{% if ins.cards.costly_ownership %}{{ ins.cards.costly_ownership.item }} {{ ins.cards.costly_ownership.amount|floatformat:0 }}{% else %}–{% endif %}</span>
-      <span class="text-slate-500">{% if ins.cards.costly_ownership %}{% if ins_scope == 'month' %}{{ ins.cards.costly_ownership.date|date:"F Y" }}{% else %}{{ ins.cards.costly_ownership.date|date:"M d" }}{% endif %}{% else %}–{% endif %}</span>
+      <span class="font-medium text-center">{% if ins.cards.costly_ownership %}{{ ins.cards.costly_ownership.item }} {{ ins.cards.costly_ownership.amount|floatformat:0 }}{% else %}–{% endif %}</span>
+      <span class="text-slate-500 text-right">{% if ins.cards.costly_ownership %}{% if ins_scope == 'month' %}{{ ins.cards.costly_ownership.date|date:"F Y" }}{% else %}{{ ins.cards.costly_ownership.date|date:"M d" }}{% endif %}{% else %}–{% endif %}</span>
     </div>
-    <div class="flex justify-between px-4 py-4 bg-fuchsia-50 border-b">
+    <div class="grid grid-cols-[1fr_auto_1fr] items-baseline px-4 py-4 bg-fuchsia-50 border-b">
       <span class="text-slate-500">Most Costly Miscellaneous</span>
-      <span class="font-medium">{% if ins.cards.costly_misc %}{{ ins.cards.costly_misc.item }} {{ ins.cards.costly_misc.amount|floatformat:0 }}{% else %}–{% endif %}</span>
-      <span class="text-slate-500">{% if ins.cards.costly_misc %}{% if ins_scope == 'month' %}{{ ins.cards.costly_misc.date|date:"F Y" }}{% else %}{{ ins.cards.costly_misc.date|date:"M d" }}{% endif %}{% else %}–{% endif %}</span>
+      <span class="font-medium text-center">{% if ins.cards.costly_misc %}{{ ins.cards.costly_misc.item }} {{ ins.cards.costly_misc.amount|floatformat:0 }}{% else %}–{% endif %}</span>
+      <span class="text-slate-500 text-right">{% if ins.cards.costly_misc %}{% if ins_scope == 'month' %}{{ ins.cards.costly_misc.date|date:"F Y" }}{% else %}{{ ins.cards.costly_misc.date|date:"M d" }}{% endif %}{% else %}–{% endif %}</span>
     </div>
   </div>
 
