@@ -170,6 +170,17 @@ class RecordsPanelTests(TestCase):
         self.assertIn('April 2026', body)
         self.assertIn('Monthly rows in 2026', body)
 
+    def test_data_pages_use_fraction_columns_no_vw_overflow(self):
+        # 25+25+50vw columns sum to 100vw which overflows by scrollbar width;
+        # fractions of the flex parent fit exactly, root clips any remainder
+        for url in ('/day/2026-04-15/', '/month/2026-04/'):
+            body = self.client.get(url).content.decode()
+            self.assertNotIn('w-[25vw]', body)
+            self.assertNotIn('w-[50vw]', body)
+            self.assertIn('lg:w-1/4', body)
+            self.assertIn('lg:w-1/2', body)
+            self.assertIn('overflow-x-clip', body)
+
     def test_create_update_move_delete_roundtrip(self):
         # create
         r = self.client.post(

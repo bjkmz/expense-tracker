@@ -29,18 +29,18 @@
     <input type="hidden" name="period" value="{{ period }}" />
     {% if show_date_input %}
       <input type="date" name="date" value="{{ add_date_value }}" required
-             class="col-span-4 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm mb-1" />
+             class="col-span-4 min-w-0 w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm mb-1" />
     {% else %}
       <input type="hidden" name="date" value="{{ add_date_value }}" />
     {% endif %}
     <input name="item" placeholder="Item name" required maxlength="128"
-           class="bg-transparent border-b border-slate-600 px-1 text-sm focus:outline-none" />
-    <select name="category" required class="bg-slate-800 border border-slate-700 rounded text-sm">
+           class="min-w-0 w-full bg-transparent border-b border-slate-600 px-1 text-sm focus:outline-none" />
+    <select name="category" required class="min-w-0 bg-slate-800 border border-slate-700 rounded text-sm">
       <option value="">Category</option>
       {% for c in categories %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
     </select>
     <input name="amount" type="number" min="0.01" step="0.01" placeholder="Cost" required
-           class="bg-transparent border-b border-slate-600 px-1 text-sm focus:outline-none" />
+           class="min-w-0 w-full bg-transparent border-b border-slate-600 px-1 text-sm focus:outline-none" />
     <button type="submit" title="Add" class="text-slate-400 text-xl leading-none">⊕</button>
   </form>
 
@@ -54,14 +54,14 @@
           <input type="hidden" name="scope" value="{{ scope }}" />
           <input type="hidden" name="period" value="{{ period }}" />
           <input name="item" value="{{ r.item }}" maxlength="128"
-                 class="bg-transparent px-1 text-sm border-b border-transparent hover:border-slate-600 focus:border-neutral-400 focus:outline-none" />
-          <select name="category" class="bg-transparent text-sm border-b border-transparent hover:border-slate-600 focus:outline-none">
+                 class="min-w-0 w-full bg-transparent px-1 text-sm border-b border-transparent hover:border-slate-600 focus:border-neutral-400 focus:outline-none" />
+          <select name="category" class="min-w-0 bg-transparent text-sm border-b border-transparent hover:border-slate-600 focus:outline-none">
             {% for c in categories %}
               <option value="{{ c.id }}" {% if c.id == r.category_id %}selected{% endif %}>{{ c.name }}</option>
             {% endfor %}
           </select>
           <input name="amount" type="number" min="0.01" step="0.01" value="{{ r.amount|floatformat:2 }}"
-                 class="bg-transparent px-1 text-sm border-b border-transparent hover:border-slate-600 focus:border-neutral-400 focus:outline-none" />
+                 class="min-w-0 w-full bg-transparent px-1 text-sm border-b border-transparent hover:border-slate-600 focus:border-neutral-400 focus:outline-none" />
         </form>
         <details class="relative text-right">
           <summary class="cursor-pointer list-none text-neutral-400 px-1" title="Options">⋮</summary>

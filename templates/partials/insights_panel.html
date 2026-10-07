@@ -5,7 +5,7 @@
     <button class="absolute right-2 top-2 z-10 border rounded px-2 text-slate-500" title="Toggle Line/Pie"
             hx-get="{% url 'insights-chart' %}?scope={{ ins_scope }}&period={{ ins_period }}&type={{ chart_flipped }}"
             hx-target="#insights-chart" hx-swap="innerHTML">⇄ {{ chart_flipped }}</button>
-    <div id="insights-chart">{{ chart_html|safe }}</div>
+    <div id="insights-chart" class="min-w-0">{{ chart_html|safe }}</div>
   </div>
 
   {# Summary: Category Month Totals (day) / Category Year Totals (month) #}
