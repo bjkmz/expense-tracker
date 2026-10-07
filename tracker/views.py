@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 
-from tracker.services.heatmap import get_heatmap_stats, highlight_day, highlight_month
+from tracker.services.heatmap import compact_amount, get_heatmap_stats, highlight_day, highlight_month
 from tracker.services.records import day_panel_data, month_panel_data
 
 
@@ -87,6 +87,8 @@ def calendar_day(request):
                 'iso': d_iso,
                 'income': income,
                 'expense': expense,
+                'income_s': compact_amount(income),
+                'expense_s': compact_amount(expense),
                 'flag': highlight_day(expense, stats, is_today=(d_iso == today.isoformat())),
             }
         )
@@ -142,6 +144,8 @@ def calendar_month(request):
                 'ym': ym,
                 'income': income,
                 'expense': expense,
+                'income_s': compact_amount(income),
+                'expense_s': compact_amount(expense),
                 'flag': highlight_month(expense, stats, is_this_month=(ym == this_ym)),
             }
         )

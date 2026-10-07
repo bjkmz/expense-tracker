@@ -99,6 +99,29 @@ def recompute_heatmap_stats(db_max: str | None = None) -> dict:
     return stats
 
 
+def compact_amount(v: Decimal | float | int | None) -> str:
+    """Short display for calendar cells: strip .00, k/M for thousands, dash for empty."""
+    if v is None:
+        return '–'
+    try:
+        d = Decimal(str(v))
+    except (ArithmeticError, ValueError):
+        return '–'
+    if d == 0:
+        return '–'
+    neg = d < 0
+    a = abs(d)
+    for threshold, suffix, divisor in ((Decimal(1000000), 'M', Decimal(1000000)), (Decimal(1000), 'k', Decimal(1000))):
+        if a >= threshold:
+            q = (a / divisor).quantize(Decimal('0.1'))
+            s = format(q.normalize(), 'f').rstrip('0').rstrip('.')
+            return f'-{s}{suffix}' if neg else f'{s}{suffix}'
+    s = format(d.normalize(), 'f')
+    if '.' in s:
+        s = s.rstrip('0').rstrip('.')
+    return s
+
+
 def highlight_day(expense_total: Decimal | float | None, stats: dict, is_today: bool) -> str:
     if is_today:
         return 'today'
