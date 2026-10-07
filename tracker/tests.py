@@ -198,6 +198,7 @@ class RecordsPanelTests(TestCase):
             body = self.client.get(url).content.decode()
             pos = [body.index(f'>{n}<') for n in want]
             self.assertEqual(pos, sorted(pos))
+            self.assertRegex(body, r'<option[^>]*class="bg-slate-800 text-neutral-100"')
 
     def test_insights_graph_is_sticky_half_viewport(self):
         for url in ('/day/2026-04-15/', '/month/2026-04/'):

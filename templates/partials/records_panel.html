@@ -57,7 +57,7 @@
                  class="min-w-0 w-full bg-transparent px-1 text-sm border-b border-transparent hover:border-slate-600 focus:border-neutral-400 focus:outline-none" />
           <select name="category" class="min-w-0 bg-transparent text-sm border-b border-transparent hover:border-slate-600 focus:outline-none">
             {% for c in categories %}
-              <option value="{{ c.id }}" {% if c.id == r.category_id %}selected{% endif %}>{{ c.name }}</option>
+              <option value="{{ c.id }}" class="bg-slate-800 text-neutral-100" {% if c.id == r.category_id %}selected{% endif %}>{{ c.name }}</option>
             {% endfor %}
           </select>
           <input name="amount" type="number" min="0.01" step="0.01" value="{{ r.amount|floatformat:2 }}"
