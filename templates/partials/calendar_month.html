@@ -7,13 +7,16 @@
 <div class="grid grid-cols-2 gap-px bg-black/60">
   {% for c in cells %}
     <a href="{% url 'month-detail' c.ym %}" title="I {{ c.income|default:'–' }} / E {{ c.expense|default:'–' }}"
-       class="flex items-center justify-between gap-2 px-2 py-3 min-w-0 overflow-hidden
+       class="flex items-stretch justify-between gap-2 px-2 py-2 min-w-0 overflow-hidden
         {% if c.flag == 'today' %}bg-green-300 text-neutral-900
         {% elif c.flag == 'hot' %}bg-red-300 text-neutral-900
         {% elif c.flag == 'cold' %}bg-blue-200 text-neutral-900
          {% else %}bg-neutral-600 text-neutral-100{% endif %}">
-      <span class="text-sm">{{ c.name }}</span>
-      <span class="truncate tabular-nums text-[10px] opacity-80">I {{ c.income_s }} / E {{ c.expense_s }}</span>
+      <span class="flex items-center text-sm">{{ c.name }}</span>
+      <span class="flex flex-col justify-center text-right min-w-0">
+        <span class="truncate tabular-nums text-[9px] leading-3 {% if c.flag %}text-green-800{% else %}text-green-400{% endif %}">I {{ c.income_s }}</span>
+        <span class="truncate tabular-nums text-[9px] leading-3 {% if c.flag %}text-red-800{% else %}text-red-400{% endif %}">E {{ c.expense_s }}</span>
+      </span>
     </a>
   {% endfor %}
 </div>
