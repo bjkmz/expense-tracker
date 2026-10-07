@@ -210,6 +210,8 @@ class RecordsPanelTests(TestCase):
             self.assertIn('w-max min-w-20', body)
             self.assertNotIn('w-48', body)
             self.assertIn('absolute right-0 top-full', body)
+            self.assertIn('grid-cols-[1fr_75px_60px_30px]', body)
+            self.assertNotIn('1fr_75px_60px_30px', body)
         day_body = self.client.get('/day/2026-04-15/').content.decode()
         self.assertIn("#records-list details[open]", day_body)
 
