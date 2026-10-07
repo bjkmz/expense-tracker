@@ -14,6 +14,13 @@
       var m = document.cookie.match(/csrftoken=([^;]+)/);
       if (m) { e.detail.headers['X-CSRFToken'] = m[1]; }
     });
+    // Calendar Day/Month tabs: highlight active tab within its own button group.
+    function setCalTab(btn) {
+      var wrap = btn.parentElement;
+      if (!wrap) return;
+      wrap.querySelectorAll('[data-cal-tab]').forEach(function (b) { b.classList.remove('cal-tab-active'); });
+      btn.classList.add('cal-tab-active');
+    }
     // Home Add Record modal: on server-confirmed save, close + toast + refresh calendars.
     // The server sends HX-Trigger: record-created only on success; errors stay in #add-error.
     document.addEventListener('htmx:afterRequest', function (e) {
@@ -42,6 +49,7 @@
     :root { --banner: #FF9A8B; --teal: #5ED6DC; }
     .banner { color: var(--banner); letter-spacing: .02em; text-shadow: 0 2px 12px rgba(255,255,255,0.9), 0 0 2px #fff; }
     .banner-bg { background-image: url('/static/banner-bg.jpg'); background-size: cover; background-position: center; }
+    .cal-tab-active { border-color: #d4d4d4; color: #e5e5e5; background: rgba(255,255,255,0.08); }
   </style>
   {% block head %}{% endblock %}
 </head>

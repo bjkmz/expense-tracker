@@ -10,8 +10,8 @@
     </div>
     <div id="aside-body" class="flex flex-col flex-1">
       <div class="flex gap-2 px-3">
-        <button class="flex-1 border rounded py-1" hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-target="[data-cal-desktop]" hx-swap="innerHTML">DAY</button>
-        <button class="flex-1 border rounded py-1" hx-get="{% url 'calendar-month' %}?y={{ default_y }}" hx-target="[data-cal-desktop]" hx-swap="innerHTML">MONTH</button>
+        <button data-cal-tab class="flex-1 border rounded py-1 cal-tab-active" onclick="setCalTab(this)" hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-target="[data-cal-desktop]" hx-swap="innerHTML">DAY</button>
+        <button data-cal-tab class="flex-1 border rounded py-1" onclick="setCalTab(this)" hx-get="{% url 'calendar-month' %}?y={{ default_y }}" hx-target="[data-cal-desktop]" hx-swap="innerHTML">MONTH</button>
       </div>
       <div data-cal data-cal-desktop id="calendar" class="m-3 border border-neutral-600 bg-neutral-700 rounded min-h-[240px]"
            hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-trigger="load, refresh" hx-swap="innerHTML">
@@ -43,8 +43,8 @@
   <dialog id="cal-modal" class="bg-neutral-700 text-neutral-100 rounded p-0 w-[92vw] max-w-md">
     <div class="flex items-center justify-between p-3">
       <div class="flex gap-2 flex-1 mr-2">
-        <button class="flex-1 border rounded py-1" hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-target="[data-cal-mobile]" hx-swap="innerHTML">DAY</button>
-        <button class="flex-1 border rounded py-1" hx-get="{% url 'calendar-month' %}?y={{ default_y }}" hx-target="[data-cal-mobile]" hx-swap="innerHTML">MONTH</button>
+        <button data-cal-tab class="flex-1 border rounded py-1 cal-tab-active" onclick="setCalTab(this)" hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-target="[data-cal-mobile]" hx-swap="innerHTML">DAY</button>
+        <button data-cal-tab class="flex-1 border rounded py-1" onclick="setCalTab(this)" hx-get="{% url 'calendar-month' %}?y={{ default_y }}" hx-target="[data-cal-mobile]" hx-swap="innerHTML">MONTH</button>
       </div>
       <button class="border rounded px-2" onclick="document.getElementById('cal-modal').close()">✕</button>
     </div>

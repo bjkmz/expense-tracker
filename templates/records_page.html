@@ -9,8 +9,8 @@
       <span class="text-xs text-neutral-500">calendar</span>
     </div>
     <div class="flex gap-2 px-3">
-      <button class="flex-1 border rounded py-1 text-sm" hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-target="[data-cal-side]" hx-swap="innerHTML">DAY</button>
-      <button class="flex-1 border rounded py-1 text-sm" hx-get="{% url 'calendar-month' %}?y={{ default_y }}" hx-target="[data-cal-side]" hx-swap="innerHTML">MONTH</button>
+      <button data-cal-tab class="flex-1 border rounded py-1 text-sm cal-tab-active" onclick="setCalTab(this)" hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-target="[data-cal-side]" hx-swap="innerHTML">DAY</button>
+      <button data-cal-tab class="flex-1 border rounded py-1 text-sm" onclick="setCalTab(this)" hx-get="{% url 'calendar-month' %}?y={{ default_y }}" hx-target="[data-cal-side]" hx-swap="innerHTML">MONTH</button>
     </div>
     <div data-cal data-cal-side class="m-3 border rounded border-neutral-800 min-h-[200px]"
          hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-trigger="load, refresh" hx-swap="innerHTML">
