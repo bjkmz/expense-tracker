@@ -1,0 +1,81 @@
+{# Insights panel (light). Expects: ins_scope, ins_period, ins, chart_type, chart_flipped, chart_html, day_url, month_url. #}
+<div id="insights-panel" data-scope="{{ ins_scope }}" data-period="{{ ins_period }}" class="bg-white text-neutral-800 flex flex-col">
+  {# Day / Month tabs #}
+  <div class="flex gap-2 px-3 pt-3">
+    <a href="{{ day_url }}" class="flex-1 text-center border rounded py-1 text-sm {% if ins_scope == 'day' %}bg-neutral-900 text-white{% endif %}">DAY</a>
+    <a href="{{ month_url }}" class="flex-1 text-center border rounded py-1 text-sm {% if ins_scope == 'month' %}bg-neutral-900 text-white{% endif %}">MONTH</a>
+  </div>
+
+  {# Chart with Line<->Pie toggle chevron #}
+  <div class="relative m-3 border rounded min-h-[220px]">
+    <button class="absolute right-2 top-2 z-10 border rounded px-2 text-slate-500" title="Toggle Line/Pie"
+            hx-get="{% url 'insights-chart' %}?scope={{ ins_scope }}&period={{ ins_period }}&type={{ chart_flipped }}"
+            hx-target="#insights-chart" hx-swap="innerHTML">⇄ {{ chart_flipped }}</button>
+    <div id="insights-chart">{{ chart_html|safe }}</div>
+  </div>
+
+  {# Summary: Category Month Totals (day) / Category Year Totals (month) #}
+  <div class="px-4 py-2 text-sm border-b">
+    <div class="font-bold text-slate-500">SUMMARY: <span class="font-normal">{{ ins.net|floatformat:2 }}</span></div>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-x-4 text-slate-500">
+      {% for name, total in ins.totals.items %}
+        <div>{{ name }}: {{ total|floatformat:2 }}</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# Insight cards #}
+  <div class="text-sm">
+    <div class="flex justify-between px-4 py-2 bg-violet-50 border-b">
+      <span class="text-slate-500">Highest Income</span>
+      <span class="font-medium">{{ ins.cards.highest_income.amount|floatformat:2 }}</span>
+      <span class="text-slate-500">{% if ins.cards.highest_income.when %}{% if ins_scope == 'month' %}{{ ins.cards.highest_income.when|date:"F Y" }}{% else %}{{ ins.cards.highest_income.when|date:"M d" }}{% endif %}{% else %}–{% endif %}</span>
+    </div>
+    <div class="flex justify-between px-4 py-2 bg-rose-50 border-b">
+      <span class="text-slate-500">Top Food</span>
+      <span class="font-medium">{{ ins.cards.top_food.item }}</span>
+      <span class="text-slate-500">{{ ins.cards.top_food.count }} records</span>
+    </div>
+    <div class="flex justify-between px-4 py-2 bg-green-50 border-b">
+      <span class="text-slate-500">Top Transpo</span>
+      <span class="font-medium">{{ ins.cards.top_transpo.item }}</span>
+      <span class="text-slate-500">{{ ins.cards.top_transpo.count }} records</span>
+    </div>
+    <div class="flex justify-between px-4 py-2 bg-amber-50 border-b">
+      <span class="text-slate-500">Most Costly Consumable</span>
+      <span class="font-medium">{% if ins.cards.costly_consumable %}{{ ins.cards.costly_consumable.item }} {{ ins.cards.costly_consumable.amount|floatformat:0 }}{% else %}–{% endif %}</span>
+      <span class="text-slate-500">{% if ins.cards.costly_consumable %}{% if ins_scope == 'month' %}{{ ins.cards.costly_consumable.date|date:"F Y" }}{% else %}{{ ins.cards.costly_consumable.date|date:"M d" }}{% endif %}{% else %}–{% endif %}</span>
+    </div>
+    <div class="flex justify-between px-4 py-2 bg-teal-50 border-b">
+      <span class="text-slate-500">Most Costly Ownership</span>
+      <span class="font-medium">{% if ins.cards.costly_ownership %}{{ ins.cards.costly_ownership.item }} {{ ins.cards.costly_ownership.amount|floatformat:0 }}{% else %}–{% endif %}</span>
+      <span class="text-slate-500">{% if ins.cards.costly_ownership %}{% if ins_scope == 'month' %}{{ ins.cards.costly_ownership.date|date:"F Y" }}{% else %}{{ ins.cards.costly_ownership.date|date:"M d" }}{% endif %}{% else %}–{% endif %}</span>
+    </div>
+    <div class="flex justify-between px-4 py-2 bg-fuchsia-50 border-b">
+      <span class="text-slate-500">Most Costly Miscellaneous</span>
+      <span class="font-medium">{% if ins.cards.costly_misc %}{{ ins.cards.costly_misc.item }} {{ ins.cards.costly_misc.amount|floatformat:0 }}{% else %}–{% endif %}</span>
+      <span class="text-slate-500">{% if ins.cards.costly_misc %}{% if ins_scope == 'month' %}{{ ins.cards.costly_misc.date|date:"F Y" }}{% else %}{{ ins.cards.costly_misc.date|date:"M d" }}{% endif %}{% else %}–{% endif %}</span>
+    </div>
+  </div>
+
+  {# Sort + Filter (filter placeholder, no function yet) #}
+  <div class="flex items-center justify-end gap-2 px-3 py-2 text-slate-500">
+    <span class="text-xs mr-auto">{% if ins_scope == 'day' %}Daily rows in {{ ins.label }}{% else %}Monthly rows in {{ ins.label }}{% endif %}</span>
+    <button class="border rounded px-1 text-sm" title="Filter (placeholder, no function yet)" disabled>⧩</button>
+    <button class="border rounded px-1 text-sm" title="Total Expense descending"
+            hx-get="{% url 'insights-list' %}?scope={{ ins_scope }}&period={{ ins_period }}&sort=expense_desc"
+            hx-target="#insights-list" hx-swap="innerHTML">E↓</button>
+    <button class="border rounded px-1 text-sm" title="Total Expense ascending"
+            hx-get="{% url 'insights-list' %}?scope={{ ins_scope }}&period={{ ins_period }}&sort=expense_asc"
+            hx-target="#insights-list" hx-swap="innerHTML">E↑</button>
+    <button class="border rounded px-1 text-sm" title="Income descending"
+            hx-get="{% url 'insights-list' %}?scope={{ ins_scope }}&period={{ ins_period }}&sort=income_desc"
+            hx-target="#insights-list" hx-swap="innerHTML">I↓</button>
+    <button class="border rounded px-1 text-sm" title="Income ascending"
+            hx-get="{% url 'insights-list' %}?scope={{ ins_scope }}&period={{ ins_period }}&sort=income_asc"
+            hx-target="#insights-list" hx-swap="innerHTML">I↑</button>
+  </div>
+  <div id="insights-list">
+    {% include "partials/insights_list.html" with rows=ins.rows ins_scope=ins_scope %}
+  </div>
+</div>

@@ -1,0 +1,9 @@
+db.sqlite3
+tmp/cache/*
+!tmp/cache/.gitkeep
+tmp/charts/*
+!tmp/charts/.gitkeep
+__pycache__/
+*.pyc
+
+/reference

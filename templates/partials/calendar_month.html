@@ -1,0 +1,19 @@
+{# Month heatmap grid: 2-col like 2.png. Each cell: MON + income + expense. #}
+<div class="flex items-center justify-between px-2 py-2 border-b border-neutral-800">
+  <button class="px-2 text-neutral-400" hx-get="{% url 'calendar-month' %}?y={{ prev_y }}" hx-target="closest [data-cal]" hx-swap="innerHTML">‹</button>
+  <span class="font-semibold">{{ y }}</span>
+  <button class="px-2 text-neutral-400" hx-get="{% url 'calendar-month' %}?y={{ next_y }}" hx-target="closest [data-cal]" hx-swap="innerHTML">›</button>
+</div>
+<div class="grid grid-cols-2 gap-px bg-black/60">
+  {% for c in cells %}
+    <a href="{% url 'month-detail' c.ym %}"
+       class="flex items-center justify-between px-2 py-3
+        {% if c.flag == 'today' %}bg-green-300 text-neutral-900
+        {% elif c.flag == 'hot' %}bg-red-300 text-neutral-900
+        {% elif c.flag == 'cold' %}bg-blue-200 text-neutral-900
+        {% else %}bg-neutral-800 text-neutral-100{% endif %}">
+      <span class="text-sm">{{ c.name }}</span>
+      <span class="text-[10px] opacity-80">I {{ c.income|default:"–" }} / E {{ c.expense|default:"–" }}</span>
+    </a>
+  {% endfor %}
+</div>

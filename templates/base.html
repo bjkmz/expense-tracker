@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Expense Tracker{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  {# plotly.js loaded ONCE here. HTMX partials must use include_plotlyjs=False. #}
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script>
+    // Attach Django CSRF token to all HTMX mutating requests (POST/PUT/PATCH/DELETE)
+    document.addEventListener('htmx:configRequest', function (e) {
+      var m = document.cookie.match(/csrftoken=([^;]+)/);
+      if (m) { e.detail.headers['X-CSRFToken'] = m[1]; }
+    });
+    // Home Add Record modal: on server-confirmed save, close + toast + refresh calendars.
+    // The server sends HX-Trigger: record-created only on success; errors stay in #add-error.
+    document.addEventListener('htmx:afterRequest', function (e) {
+      if (!e.target || e.target.id !== 'add-form') return;
+      var trig = e.detail.xhr ? e.detail.xhr.getResponseHeader('HX-Trigger') : null;
+      if (trig && trig.indexOf('record-created') !== -1) {
+        var modal = document.getElementById('add-modal');
+        var form = document.getElementById('add-form');
+        if (form) form.reset();
+        var err = document.getElementById('add-error');
+        if (err) { err.innerHTML = ''; err.className = 'mb-2 px-3 py-2 rounded text-sm'; }
+        if (modal && modal.open) modal.close();
+        var toast = document.getElementById('home-toast');
+        if (toast) {
+          toast.textContent = 'Record saved for today.';
+          toast.classList.remove('hidden');
+          setTimeout(function () { toast.classList.add('hidden'); }, 3000);
+        }
+        if (window.htmx) {
+          document.querySelectorAll('[data-cal]').forEach(function (el) { htmx.trigger(el, 'refresh'); });
+        }
+      }
+    });
+  </script>
+  <style>
+    :root { --banner: #FF5A5A; --teal: #5ED6DC; }
+    .banner { color: var(--banner); letter-spacing: .02em; }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body class="bg-neutral-100 text-neutral-900" hx-boost="false">
+  {% block content %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,24 @@
+{# Day heatmap grid: 7-col sequential like sketches. Each cell: day no. + income + expense. #}
+<div class="flex items-center justify-between px-2 py-2 border-b border-neutral-800">
+  <button class="px-2 text-neutral-400" hx-get="{% url 'calendar-day' %}?ym={{ prev_ym }}" hx-target="closest [data-cal]" hx-swap="innerHTML">‹</button>
+  <span class="font-semibold">{{ ym_label }}</span>
+  <button class="px-2 text-neutral-400" hx-get="{% url 'calendar-day' %}?ym={{ next_ym }}" hx-target="closest [data-cal]" hx-swap="innerHTML">›</button>
+</div>
+<div class="grid grid-cols-7 gap-px bg-black/60">
+  {% for c in cells %}
+    {% if c is None %}
+      <div class="bg-neutral-900 min-h-[52px]"></div>
+    {% else %}
+      <a href="{% url 'day-detail' c.iso %}"
+         class="block min-h-[52px] p-1 text-left
+          {% if c.flag == 'today' %}bg-green-300 text-neutral-900
+          {% elif c.flag == 'hot' %}bg-red-300 text-neutral-900
+          {% elif c.flag == 'cold' %}bg-blue-200 text-neutral-900
+          {% else %}bg-neutral-800 text-neutral-100{% endif %}">
+        <div class="text-sm font-semibold leading-4">{{ c.day }}</div>
+        <div class="text-[10px] leading-3 opacity-80">I {{ c.income|default:"–" }}</div>
+        <div class="text-[10px] leading-3 opacity-80">E {{ c.expense|default:"–" }}</div>
+      </a>
+    {% endif %}
+  {% endfor %}
+</div>

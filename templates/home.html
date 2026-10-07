@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Expense Tracker — Home{% endblock %}
+{% block content %}
+<div class="min-h-screen flex flex-col md:flex-row">
+  {# Desktop / tablet collapsible aside. Hidden on mobile (modal instead). #}
+  <aside id="sidenav" class="hidden md:flex bg-neutral-900 text-neutral-100 md:w-72 shrink-0 flex-col">
+    <div class="flex items-center justify-between p-3">
+      <img src="/static/logo.png" alt="logo" class="h-8 w-auto" onerror="this.style.display='none'" />
+      <button class="border rounded px-2" title="Collapse" onclick="document.getElementById('aside-body').classList.toggle('hidden');document.getElementById('sidenav').classList.toggle('md:w-72');document.getElementById('sidenav').classList.toggle('md:w-16')">‹</button>
+    </div>
+    <div id="aside-body" class="flex flex-col flex-1">
+      <div class="flex gap-2 px-3">
+        <button class="flex-1 border rounded py-1" hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-target="[data-cal-desktop]" hx-swap="innerHTML">DAY</button>
+        <button class="flex-1 border rounded py-1" hx-get="{% url 'calendar-month' %}?y={{ default_y }}" hx-target="[data-cal-desktop]" hx-swap="innerHTML">MONTH</button>
+      </div>
+      <div data-cal data-cal-desktop id="calendar" class="m-3 border rounded min-h-[240px]"
+           hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-trigger="load, refresh" hx-swap="innerHTML">
+        <div class="p-4 text-sm text-neutral-500">Loading calendar…</div>
+      </div>
+      <div class="mt-auto p-3 border-t border-neutral-800 text-sm text-neutral-400">[ PROFILE ROW ] — placeholder, no auth yet</div>
+    </div>
+  </aside>
+
+  <main class="flex-1">
+    <header class="bg-white border-b">
+      <h1 class="banner text-4xl md:text-6xl font-black text-center py-6">Ǝ%PENSE TRACKER</h1>
+    </header>
+    <div class="flex justify-center py-6 bg-white">
+      <button class="rounded-2xl px-6 py-3 text-white" style="background: var(--teal)"
+              onclick="document.getElementById('add-modal').showModal()">⊕ ADD RECORD</button>
+    </div>
+    <div id="home-toast" class="hidden mx-auto my-2 max-w-md px-4 py-2 rounded bg-green-100 text-green-800 text-sm text-center"></div>
+    <section class="bg-neutral-200 min-h-[40vh] flex items-center justify-center">
+      <p class="text-neutral-500">[ INSIGHTS SECTION ] — blank in P2, wired in P4 ({{ today }})</p>
+    </section>
+  </main>
+
+  {# Mobile bottom bar + calendar modal (3.png). Desktop aside stays hidden on mobile. #}
+  <nav class="md:hidden fixed bottom-0 inset-x-0 bg-neutral-900 text-neutral-100 flex justify-between p-3">
+    <button class="border rounded-full w-10 h-10" title="Profile">◔</button>
+    <button class="border rounded-full w-10 h-10" title="Calendar" onclick="document.getElementById('cal-modal').showModal()">📅</button>
+  </nav>
+  <dialog id="cal-modal" class="bg-neutral-900 text-neutral-100 rounded p-0 w-[92vw] max-w-md">
+    <div class="flex items-center justify-between p-3">
+      <div class="flex gap-2 flex-1 mr-2">
+        <button class="flex-1 border rounded py-1" hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-target="[data-cal-mobile]" hx-swap="innerHTML">DAY</button>
+        <button class="flex-1 border rounded py-1" hx-get="{% url 'calendar-month' %}?y={{ default_y }}" hx-target="[data-cal-mobile]" hx-swap="innerHTML">MONTH</button>
+      </div>
+      <button class="border rounded px-2" onclick="document.getElementById('cal-modal').close()">✕</button>
+    </div>
+    <div data-cal data-cal-mobile id="calendar-m" class="m-3 border rounded min-h-[240px]"
+         hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-trigger="load, refresh" hx-swap="innerHTML">
+      <div class="p-4 text-sm text-neutral-500">Loading calendar…</div>
+    </div>
+  </dialog>
+  {% include "partials/add_modal.html" %}
+</div>
+{% endblock %}

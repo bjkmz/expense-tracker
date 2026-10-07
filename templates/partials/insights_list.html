@@ -1,0 +1,16 @@
+{# Sortable daily/monthly summary rows. Parent passes rows + ins_scope. #}
+{% for r in rows %}
+  <div class="grid grid-cols-[28px_1fr_1fr] md:grid-cols-[28px_1fr_1fr_1fr_1fr] gap-1 items-baseline px-3 py-2 border-b border-neutral-200 text-sm">
+    <span class="text-slate-500">{{ r.label }}</span>
+    <span><span class="text-xs text-neutral-500">Income </span>{{ r.income|floatformat:2 }}</span>
+    <span><span class="text-xs text-neutral-500">Expense </span>{{ r.expense|floatformat:2 }}</span>
+    <span class="hidden md:block text-xs text-neutral-500">
+      Food {{ r.cats.Food|floatformat:1 }} · Transpo {{ r.cats.Transpo|floatformat:1 }} · Cons {{ r.cats.Consumable|floatformat:1 }}
+    </span>
+    <span class="hidden md:block text-xs text-neutral-500">
+      Own {{ r.cats.Ownership|floatformat:1 }} · Misc {{ r.cats.Miscellaneous|floatformat:1 }}
+    </span>
+  </div>
+{% empty %}
+  <div class="px-4 py-6 text-center text-sm text-neutral-500">No data in this period yet.</div>
+{% endfor %}

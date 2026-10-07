@@ -1,0 +1,33 @@
+{# Home Add Record modal (P5). Date fixed to today per outline; edit later via records ⋮ menu. #}
+<dialog id="add-modal" class="rounded-2xl p-0 w-[92vw] max-w-sm text-neutral-900">
+  <form id="add-form" method="post" action="{% url 'record-create' %}"
+        hx-post="{% url 'record-create' %}" hx-target="#add-error" hx-swap="innerHTML">
+    {% csrf_token %}
+    <div class="p-5">
+      <h3 class="text-lg font-bold mb-1">Add Record</h3>
+      <p class="text-xs text-neutral-500 mb-3">Recorded as today ({{ today_iso }}).</p>
+      <div id="add-error" class="mb-2 px-3 py-2 rounded text-sm"></div>
+      <input type="hidden" name="date" value="{{ today_iso }}" />
+      <input type="hidden" name="origin" value="home-modal" />
+      <label class="block text-sm mb-2">Item
+        <input name="item" required maxlength="128" placeholder="Item name" autocomplete="off"
+               class="mt-1 w-full border rounded px-2 py-1" />
+      </label>
+      <label class="block text-sm mb-2">Category
+        <select name="category" required class="mt-1 w-full border rounded px-2 py-1 bg-white">
+          <option value="">Pick a category</option>
+          {% for c in categories %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="block text-sm mb-4">Amount
+        <input name="amount" type="number" min="0.01" step="0.01" required placeholder="0.00"
+               class="mt-1 w-full border rounded px-2 py-1" />
+      </label>
+      <div class="flex justify-end gap-2">
+        <button type="button" class="border rounded px-4 py-2 text-sm"
+                onclick="document.getElementById('add-modal').close()">Cancel</button>
+        <button type="submit" id="add-save" class="rounded px-4 py-2 text-sm text-white" style="background: var(--teal)">Save</button>
+      </div>
+    </div>
+  </form>
+</dialog>
