@@ -2,13 +2,8 @@
 <div id="insights-panel" data-scope="{{ ins_scope }}" data-period="{{ ins_period }}" class="bg-white text-neutral-800 flex flex-col">
   {# Graph + summary fused card: exactly half viewport, sticks 4px below top while rows scroll #}
   <div class="m-3 border rounded bg-white sticky top-1 z-10 h-[50vh] flex flex-col overflow-hidden">
-    {# Chart (fills whatever the card leaves after summary) with Line<->Pie toggle #}
-    <div id="insights-chart-box" class="relative flex-1 min-h-0">
-      <button class="absolute right-2 top-2 z-10 border rounded px-2 text-slate-500" title="Toggle Line/Pie"
-              hx-get="{% url 'insights-chart' %}?scope={{ ins_scope }}&period={{ ins_period }}&type={{ chart_flipped }}"
-              hx-target="#insights-chart" hx-swap="innerHTML">⇄ {{ chart_flipped }}</button>
-      <div id="insights-chart" class="min-w-0">{{ chart_html|safe }}</div>
-    </div>
+    {# Chart box (button + figure); the toggle endpoint re-renders this same partial #}
+    {% include 'partials/insights_chart.html' %}
 
     {# Summary: Category Month Totals (day) / Category Year Totals (month) #}
     <div class="px-4 pt-1 pb-2 text-sm border-t">

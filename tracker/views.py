@@ -398,8 +398,16 @@ def insights_chart(request):
         period = today.isoformat() if scope == 'day' else today.strftime('%Y-%m')
     from tracker.services.charts import get_chart_html
 
+    if kind not in ('line', 'pie'):
+        kind = 'line'
     html, _ = get_chart_html(scope, period, kind)
-    return render(request, 'partials/insights_chart.html', {'chart_html': html})
+    flipped = 'pie' if kind == 'line' else 'line'
+    return render(request, 'partials/insights_chart.html', {
+        'ins_scope': scope,
+        'ins_period': period,
+        'chart_flipped': flipped,
+        'chart_html': html,
+    })
 
 
 @require_GET

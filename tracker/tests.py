@@ -352,10 +352,17 @@ class InsightsPanelTests(TestCase):
         self.assertIn('Monthly Expenses', body)
 
     def test_chart_and_list_partials(self):
-        self.assertEqual(
-            self.client.get('/partials/insights/chart/', {'scope': 'day', 'period': '2026-04-15', 'type': 'pie'}).status_code,
-            200,
-        )
+        pie = self.client.get('/partials/insights/chart/', {'scope': 'day', 'period': '2026-04-15', 'type': 'pie'})
+        self.assertEqual(pie.status_code, 200)
+        pie_body = pie.content.decode()
+        self.assertIn('insights-chart-box', pie_body)
+        self.assertNotIn('{#', pie_body)
+        self.assertIn('type=line', pie_body)
+        line = self.client.get('/partials/insights/chart/', {'scope': 'day', 'period': '2026-04-15', 'type': 'line'})
+        line_body = line.content.decode()
+        self.assertIn('type=pie', line_body)
+        bogus = self.client.get('/partials/insights/chart/', {'scope': 'day', 'period': '2026-04-15', 'type': 'nope'})
+        self.assertIn('type=pie', bogus.content.decode())
         r = self.client.get('/partials/insights/list/', {'scope': 'day', 'period': '2026-04-15', 'sort': 'income_desc'})
         self.assertEqual(r.status_code, 200)
         body = r.content.decode()
