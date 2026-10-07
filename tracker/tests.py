@@ -149,7 +149,26 @@ class RecordsPanelTests(TestCase):
         body = r.content.decode()
         self.assertIn('April 2026', body)
         self.assertIn('SUMMARY', body)
-        self.assertIn('type="month"', body)
+        # jump pickers live in the calendar headers only, not the records head
+        self.assertNotIn('type="month"', body)
+
+    def test_calendar_partials_carry_icon_jump_pickers(self):
+        day = self.client.get('/partials/calendar/day/', {'ym': '2026-04'}).content.decode()
+        self.assertIn('type="date"', day)
+        self.assertIn('jumpCalDay', day)
+        month = self.client.get('/partials/calendar/month/', {'y': '2026'}).content.decode()
+        self.assertIn('type="month"', month)
+        self.assertIn('jumpCalMonth', month)
+
+    def test_jump_targets_detail_pages(self):
+        # jump navigates like a cell click: day page bundles records=date +
+        # insights=month; month page bundles records=month + insights=year
+        body = self.client.get('/day/2026-04-15/').content.decode()
+        self.assertIn('April 15, 2026', body)
+        self.assertIn('Daily rows in April 2026', body)
+        body = self.client.get('/month/2026-04/').content.decode()
+        self.assertIn('April 2026', body)
+        self.assertIn('Monthly rows in 2026', body)
 
     def test_create_update_move_delete_roundtrip(self):
         # create

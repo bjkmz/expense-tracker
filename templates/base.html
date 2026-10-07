@@ -51,18 +51,19 @@
       }
     }
     // Calendar jump pickers: icon-only date/month inputs in day/month headers.
-    // Slice the picked value to the needed precision, swap the enclosing
-    // calendar grid in-panel via HTMX, then reset so re-picking fires change.
+    // Navigate like a calendar cell click so calendar + records + insights
+    // all land together (day page: records=date, insights=month;
+    // month page: records=month, insights=year). Skip if already there.
     function jumpCalDay(el) {
       if (!el.value) return;
-      var box = el.closest('[data-cal]');
-      if (window.htmx && box) htmx.ajax('GET', "{% url 'calendar-day' %}?ym=" + el.value.slice(0, 7), {target: box, swap: 'innerHTML'});
+      var target = '/day/' + el.value + '/';
+      if (window.location.pathname !== target) window.location = target;
       el.value = el.defaultValue;
     }
     function jumpCalMonth(el) {
       if (!el.value) return;
-      var box = el.closest('[data-cal]');
-      if (window.htmx && box) htmx.ajax('GET', "{% url 'calendar-month' %}?y=" + el.value.slice(0, 4), {target: box, swap: 'innerHTML'});
+      var target = '/month/' + el.value.slice(0, 7) + '/';
+      if (window.location.pathname !== target) window.location = target;
       el.value = el.defaultValue;
     }
     // Home Add Record modal: on server-confirmed save, close + toast + refresh calendars.
