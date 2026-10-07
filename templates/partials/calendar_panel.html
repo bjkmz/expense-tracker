@@ -3,9 +3,6 @@
   <a href="/" class="flex items-center gap-2">
     <img src="/static/logo.png" alt="logo" class="h-8 w-auto" onerror="this.style.display='none'" />
   </a>
-  {% if collapsible %}
-  <button class="border rounded px-2" title="Collapse" onclick="document.getElementById('aside-body').classList.toggle('hidden');document.getElementById('sidenav').classList.toggle('md:w-[25vw]');document.getElementById('sidenav').classList.toggle('md:w-16')">‹</button>
-  {% endif %}
 </div>
 <div {% if collapsible %}id="aside-body" {% endif %}class="flex flex-col flex-1 bg-neutral-800">
   <div class="h-3 bg-gradient-to-b from-neutral-700 to-neutral-800" aria-hidden="true"></div>

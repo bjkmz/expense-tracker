@@ -21,6 +21,35 @@
       wrap.querySelectorAll('[data-cal-tab]').forEach(function (b) { b.classList.remove('cal-tab-active'); });
       btn.classList.add('cal-tab-active');
     }
+    // Home calendar aside: full hide + unified folder tab.
+    // Aside always keeps `hidden` (mobile); `md:flex` controls desktop visibility.
+    // Toggle sits at logo-row height: inside the 25vw edge when open (mirrored tab),
+    // docked at left-0 when closed. Only position, rounding side, chevron, and title change.
+    function toggleHomeCal() {
+      var side = document.getElementById('sidenav');
+      var btn = document.getElementById('cal-toggle');
+      if (!side) return;
+      var open = side.classList.contains('md:flex');
+      if (open) {
+        side.classList.remove('md:flex');
+        side.classList.add('hidden');
+      } else {
+        side.classList.add('md:flex');
+        side.classList.add('hidden');
+      }
+      if (btn) {
+        var nowOpen = !open;
+        btn.classList.remove(nowOpen ? 'left-0' : 'right-[75vw]');
+        btn.classList.add(nowOpen ? 'right-[75vw]' : 'left-0');
+        btn.classList.remove(nowOpen ? 'rounded-r-full' : 'rounded-l-full');
+        btn.classList.add(nowOpen ? 'rounded-l-full' : 'rounded-r-full');
+        btn.classList.remove(nowOpen ? 'border-l-0' : 'border-r-0');
+        btn.classList.add(nowOpen ? 'border-r-0' : 'border-l-0');
+        var mark = btn.querySelector('svg');
+        if (mark) mark.style.transform = nowOpen ? '' : 'rotate(180deg)';
+        btn.title = nowOpen ? 'Hide calendar' : 'Show calendar';
+      }
+    }
     // Home Add Record modal: on server-confirmed save, close + toast + refresh calendars.
     // The server sends HX-Trigger: record-created only on success; errors stay in #add-error.
     document.addEventListener('htmx:afterRequest', function (e) {
