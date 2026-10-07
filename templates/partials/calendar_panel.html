@@ -1,0 +1,30 @@
+{# Shared calendar panel (home + data views). Params: mode='desktop'|'side', collapsible=True/False. #}
+<div class="flex items-center justify-between p-3 bg-neutral-700">
+  <a href="/" class="flex items-center gap-2">
+    <img src="/static/logo.png" alt="logo" class="h-8 w-auto" onerror="this.style.display='none'" />
+  </a>
+  {% if collapsible %}
+  <button class="border rounded px-2" title="Collapse" onclick="document.getElementById('aside-body').classList.toggle('hidden');document.getElementById('sidenav').classList.toggle('md:w-[25vw]');document.getElementById('sidenav').classList.toggle('md:w-16')">‹</button>
+  {% endif %}
+</div>
+<div {% if collapsible %}id="aside-body" {% endif %}class="flex flex-col flex-1 bg-neutral-800">
+  <div class="h-3 bg-gradient-to-b from-neutral-700 to-neutral-800" aria-hidden="true"></div>
+  <div class="flex gap-2 px-3">
+    {% if mode == "side" %}
+    <button data-cal-tab class="flex-1 border rounded py-1 text-sm cal-tab-active" onclick="setCalTab(this)" hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-target="[data-cal-side]" hx-swap="innerHTML">DAY</button>
+    <button data-cal-tab class="flex-1 border rounded py-1 text-sm" onclick="setCalTab(this)" hx-get="{% url 'calendar-month' %}?y={{ default_y }}" hx-target="[data-cal-side]" hx-swap="innerHTML">MONTH</button>
+    {% else %}
+    <button data-cal-tab class="flex-1 border rounded py-1 text-sm cal-tab-active" onclick="setCalTab(this)" hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-target="[data-cal-desktop]" hx-swap="innerHTML">DAY</button>
+    <button data-cal-tab class="flex-1 border rounded py-1 text-sm" onclick="setCalTab(this)" hx-get="{% url 'calendar-month' %}?y={{ default_y }}" hx-target="[data-cal-desktop]" hx-swap="innerHTML">MONTH</button>
+    {% endif %}
+  </div>
+  {% if mode == "side" %}
+  <div data-cal data-cal-side class="m-3 border border-neutral-600 bg-neutral-700 rounded min-h-[240px]"
+       hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-trigger="load, refresh" hx-swap="innerHTML">
+  {% else %}
+  <div data-cal data-cal-desktop id="calendar" class="m-3 border border-neutral-600 bg-neutral-700 rounded min-h-[240px]"
+       hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-trigger="load, refresh" hx-swap="innerHTML">
+  {% endif %}
+    <div class="p-4 text-sm text-neutral-500">Loading calendar…</div>
+  </div>
+</div>

@@ -3,20 +3,8 @@
 {% block content %}
 <div class="min-h-screen flex flex-col lg:flex-row bg-neutral-950">
   {# Left: calendar aside (reuse Day/Month tabs) #}
-  <aside class="bg-neutral-900 text-neutral-100 w-full lg:w-[25vw] lg:flex-none lg:shrink-0 flex-col hidden md:flex">
-    <div class="flex items-center justify-between p-3">
-      <a href="/" class="font-black banner text-lg">Ǝ%PENSE</a>
-      <span class="text-xs text-neutral-500">calendar</span>
-    </div>
-    <div class="flex gap-2 px-3">
-      <button data-cal-tab class="flex-1 border rounded py-1 text-sm cal-tab-active" onclick="setCalTab(this)" hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-target="[data-cal-side]" hx-swap="innerHTML">DAY</button>
-      <button data-cal-tab class="flex-1 border rounded py-1 text-sm" onclick="setCalTab(this)" hx-get="{% url 'calendar-month' %}?y={{ default_y }}" hx-target="[data-cal-side]" hx-swap="innerHTML">MONTH</button>
-    </div>
-    <div data-cal data-cal-side class="m-3 border rounded border-neutral-800 min-h-[200px]"
-         hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-trigger="load, refresh" hx-swap="innerHTML">
-      <div class="p-4 text-sm text-neutral-500">Loading…</div>
-    </div>
-    <div class="mt-auto p-3 border-t border-neutral-800 text-sm text-neutral-500">[ PROFILE ROW ]</div>
+  <aside class="bg-neutral-700 text-neutral-100 w-full lg:w-[25vw] lg:flex-none lg:shrink-0 flex-col hidden md:flex">
+    {% include "partials/calendar_panel.html" with mode="side" collapsible=False %}
   </aside>
 
   {# Middle: records panel (dark) #}
