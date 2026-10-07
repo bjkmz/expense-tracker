@@ -188,6 +188,8 @@ class RecordsPanelTests(TestCase):
             body = self.client.get(url).content.decode()
             self.assertIn('lg:w-1/4 bg-slate-900 flex flex-col', body)
             self.assertIn('flex flex-col flex-1 min-h-[60vh]', body)
+            self.assertIn('text-xl font-bold', body)
+            self.assertIn('banner banner-dim', body)
 
     def test_insights_graph_is_sticky_half_viewport(self):
         for url in ('/day/2026-04-15/', '/month/2026-04/'):
