@@ -191,6 +191,14 @@ class RecordsPanelTests(TestCase):
             self.assertIn('text-xl font-bold', body)
             self.assertIn('banner banner-dim', body)
 
+    def test_category_dropdown_follows_category_order(self):
+        # Income first, then Food, Transpo, Consumable, Ownership, Miscellaneous
+        want = ['Income', 'Food', 'Transpo', 'Consumable', 'Ownership', 'Miscellaneous']
+        for url in ('/day/2026-04-15/', '/month/2026-04/'):
+            body = self.client.get(url).content.decode()
+            pos = [body.index(f'>{n}<') for n in want]
+            self.assertEqual(pos, sorted(pos))
+
     def test_insights_graph_is_sticky_half_viewport(self):
         for url in ('/day/2026-04-15/', '/month/2026-04/'):
             body = self.client.get(url).content.decode()

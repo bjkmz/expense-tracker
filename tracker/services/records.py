@@ -13,6 +13,15 @@ from django.db.models import Case, When
 CATEGORY_ORDER = ['Income', 'Food', 'Transpo', 'Consumable', 'Ownership', 'Miscellaneous']
 
 
+def _ordered_categories():
+    from tracker.models import Category
+
+    by_name = {c.name: c for c in Category.objects.all()}
+    return [by_name[n] for n in CATEGORY_ORDER if n in by_name] + [
+        c for c in by_name.values() if c.name not in CATEGORY_ORDER
+    ]
+
+
 def _cat_totals(qs):
     rows = qs.values('category__name').annotate(t=Sum('amount'))
     totals = {r['category__name']: r['t'] for r in rows}
@@ -20,7 +29,7 @@ def _cat_totals(qs):
 
 
 def day_panel_data(day: date) -> dict:
-    from tracker.models import Category, Expense
+    from tracker.models import Expense
 
     qs = Expense.objects.filter(date=day).select_related('category')
     totals = _cat_totals(qs)
@@ -34,12 +43,12 @@ def day_panel_data(day: date) -> dict:
         'income': income,
         'expense': expense,
         'net': income - expense,
-        'categories': list(Category.objects.order_by('name')),
+        'categories': list(_ordered_categories()),
     }
 
 
 def month_panel_data(year: int, month: int) -> dict:
-    from tracker.models import Category, Expense
+    from tracker.models import Expense
 
     qs = Expense.objects.filter(date__year=year, date__month=month).select_related('category')
     totals = _cat_totals(qs)
@@ -53,7 +62,7 @@ def month_panel_data(year: int, month: int) -> dict:
         'income': income,
         'expense': expense,
         'net': income - expense,
-        'categories': list(Category.objects.order_by('name')),
+        'categories': list(_ordered_categories()),
     }
 
 
