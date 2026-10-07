@@ -66,6 +66,17 @@
       if (window.location.pathname !== target) window.location = target;
       el.value = el.defaultValue;
     }
+    // Month add-row day picker: the invisible date input sits over a badge;
+    // picking swaps the calendar icon for a day-number cell (re-click repicks).
+    function setAddDay(el) {
+      var box = el.parentElement ? el.parentElement.querySelector('[data-add-day]') : null;
+      if (!box) return;
+      var n = el.value ? parseInt(el.value.slice(8, 10), 10) : null;
+      var icon = box.querySelector('[data-add-icon]');
+      var num = box.querySelector('[data-add-num]');
+      if (icon) icon.classList.toggle('hidden', !!n);
+      if (num) { num.classList.toggle('hidden', !n); if (n) num.textContent = n; }
+    }
     // Insights graph: the fused graph+summary card is h-[50vh] but Plotly
     // renders at its own layout size, so relayout every figure to the chart
     // box (flex-1 remainder after the summary). Runs on load, debounced

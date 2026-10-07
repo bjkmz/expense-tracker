@@ -220,10 +220,23 @@ class RecordsPanelTests(TestCase):
         month_body = self.client.get('/month/2026-04/').content.decode()
         days = [int(n) for n in re.findall(r'record-day[^"]*">(\d+)<', month_body)]
         self.assertTrue(days)
+        self.assertIn('record-day w-5 h-5 shrink-0 flex items-center justify-center', month_body)
         self.assertEqual(days, sorted(days))
         self.assertEqual(days[0], min(days))
         day_body = self.client.get('/day/2026-04-15/').content.decode()
         self.assertNotIn('record-day', day_body)
+
+    def test_month_add_row_day_picker_locked_to_month(self):
+        month_body = self.client.get('/month/2026-04/').content.decode()
+        self.assertIn('grid-cols-[20px_1fr_75px_60px_30px]', month_body)
+        self.assertNotIn('30px_1fr_75px_60px_30px', month_body)
+        self.assertIn('min="2026-04-01"', month_body)
+        self.assertIn('max="2026-04-30"', month_body)
+        self.assertIn('setAddDay', month_body)
+        self.assertIn('<span data-add-day', month_body)
+        day_body = self.client.get('/day/2026-04-15/').content.decode()
+        self.assertNotIn('<span data-add-day', day_body)
+        self.assertNotIn('20px_1fr_75px_60px_30px', day_body)
 
     def test_insights_graph_is_sticky_half_viewport(self):
         for url in ('/day/2026-04-15/', '/month/2026-04/'):

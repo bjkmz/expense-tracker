@@ -189,6 +189,9 @@ def _panel_for(scope: str, period: str, today: date, error: str = '') -> dict:
             'next_url': f'/month/{next_ym}/',
             'add_date_value': period if period != today.strftime('%Y-%m') else today.isoformat(),
             'show_date_input': True,
+            'add_min': f'{y:04d}-{m:02d}-01',
+            'add_max': f'{y:04d}-{m:02d}-{cal_module.monthrange(y, m)[1]:02d}',
+            'add_day': today.day if (y, m) == (today.year, today.month) else None,
             'error': error,
         })
         return data
