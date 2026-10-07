@@ -7,14 +7,14 @@
 <div class="grid grid-cols-7 gap-px bg-black/60">
   {% for c in cells %}
     {% if c is None %}
-      <div class="bg-neutral-900 min-h-[52px]"></div>
+      <div class="bg-neutral-700 min-h-[52px]"></div>
     {% else %}
       <a href="{% url 'day-detail' c.iso %}"
          class="block min-h-[52px] p-1 text-left
           {% if c.flag == 'today' %}bg-green-300 text-neutral-900
           {% elif c.flag == 'hot' %}bg-red-300 text-neutral-900
           {% elif c.flag == 'cold' %}bg-blue-200 text-neutral-900
-          {% else %}bg-neutral-800 text-neutral-100{% endif %}">
+          {% else %}bg-neutral-600 text-neutral-100{% endif %}">
         <div class="text-sm font-semibold leading-4">{{ c.day }}</div>
         <div class="text-[10px] leading-3 opacity-80">I {{ c.income|default:"–" }}</div>
         <div class="text-[10px] leading-3 opacity-80">E {{ c.expense|default:"–" }}</div>
