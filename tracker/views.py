@@ -369,7 +369,7 @@ def record_delete(request, pk):
     return redirect('/')
 
 
-def _insights_ctx(scope: str, period: str, chart_type: str = 'line', sort: str = 'expense_desc') -> dict:
+def _insights_ctx(scope: str, period: str, chart_type: str = 'line', sort: str = 'date_asc') -> dict:
     from tracker.services.charts import get_chart_html
     from tracker.services.insights import insights_for
 
@@ -419,11 +419,11 @@ def insights_list(request):
 
     scope = request.GET.get('scope', 'day')
     period = request.GET.get('period', '')
-    sort = request.GET.get('sort', 'expense_desc')
+    sort = request.GET.get('sort', 'date_asc')
     if scope not in ('day', 'month'):
         scope = 'day'
     if sort not in SORTS:
-        sort = 'expense_desc'
+        sort = 'date_asc'
     if not period:
         today = timezone.localdate()
         period = today.isoformat() if scope == 'day' else today.strftime('%Y-%m')
@@ -436,7 +436,7 @@ def day_detail(request, iso):
     day = _parse_iso_day(iso, today)
     ctx = _panel_for('day', day.isoformat(), today)
     chart_type = request.GET.get('chart', 'line')
-    sort = request.GET.get('sort', 'expense_desc')
+    sort = request.GET.get('sort', 'date_asc')
     ctx.update(_insights_ctx('day', day.isoformat(), chart_type, sort))
     ctx.update({
         'today': today,
@@ -458,7 +458,7 @@ def month_detail(request, ym):
         yy, mm = today.year, today.month
         cal_ym = today.strftime('%Y-%m')
     chart_type = request.GET.get('chart', 'line')
-    sort = request.GET.get('sort', 'expense_desc')
+    sort = request.GET.get('sort', 'date_asc')
     ctx.update(_insights_ctx('month', ym, chart_type, sort))
     ctx.update({
         'today': today,

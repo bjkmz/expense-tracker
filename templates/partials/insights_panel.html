@@ -54,6 +54,12 @@
   <div class="flex items-center justify-end gap-2 px-3 py-2 text-slate-500">
     <span class="text-xs mr-auto">{% if ins_scope == 'day' %}Daily rows in {{ ins.label }}{% else %}Monthly rows in {{ ins.label }}{% endif %}</span>
     <button class="border rounded px-1 text-sm" title="Filter (placeholder, no function yet)" disabled>⧩</button>
+    <button class="border rounded px-1 text-sm" title="Date ascending"
+            hx-get="{% url 'insights-list' %}?scope={{ ins_scope }}&period={{ ins_period }}&sort=date_asc"
+            hx-target="#insights-list" hx-swap="innerHTML">D↑</button>
+    <button class="border rounded px-1 text-sm" title="Date descending"
+            hx-get="{% url 'insights-list' %}?scope={{ ins_scope }}&period={{ ins_period }}&sort=date_desc"
+            hx-target="#insights-list" hx-swap="innerHTML">D↓</button>
     <button class="border rounded px-1 text-sm" title="Total Expense descending"
             hx-get="{% url 'insights-list' %}?scope={{ ins_scope }}&period={{ ins_period }}&sort=expense_desc"
             hx-target="#insights-list" hx-swap="innerHTML">E↓</button>

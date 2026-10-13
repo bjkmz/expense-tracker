@@ -24,7 +24,7 @@ from django.db.models import Case, When
 
 CATEGORY_ORDER = ['Income', 'Food', 'Transpo', 'Consumable', 'Ownership', 'Miscellaneous']
 EXPENSE_CATS = ['Food', 'Transpo', 'Consumable', 'Ownership', 'Miscellaneous']
-SORTS = ('expense_desc', 'expense_asc', 'income_desc', 'income_asc')
+SORTS = ('date_asc', 'date_desc', 'expense_desc', 'expense_asc', 'income_desc', 'income_asc')
 
 
 def _cat_totals(qs) -> dict:
@@ -131,12 +131,12 @@ def year_context(ym: str) -> dict:
     }
 
 
-def list_rows(scope: str, period: str, sort: str = 'expense_desc') -> list[dict]:
+def list_rows(scope: str, period: str, sort: str = 'date_asc') -> list[dict]:
     """Daily-in-month (scope=day) or monthly-in-year (scope=month) summary rows."""
     from tracker.models import Expense
 
     if sort not in SORTS:
-        sort = 'expense_desc'
+        sort = 'date_asc'
     if scope == 'month':
         y = int(period.split('-')[0])
         base = Expense.objects.filter(date__year=y)
@@ -177,6 +177,9 @@ def list_rows(scope: str, period: str, sort: str = 'expense_desc') -> list[dict]
                     b['cats'][r['category__name']] += amt
         rows = [b for b in buckets.values() if b['income'] or b['expense']]
 
+    if sort in ('date_asc', 'date_desc'):
+        rows.sort(key=lambda r: r['key'], reverse=(sort == 'date_desc'))
+        return rows
     key = {'expense_desc': (-1, 'expense'), 'expense_asc': (1, 'expense'),
            'income_desc': (-1, 'income'), 'income_asc': (1, 'income')}[sort]
     reverse = key[0] == -1
@@ -184,10 +187,10 @@ def list_rows(scope: str, period: str, sort: str = 'expense_desc') -> list[dict]
     return rows
 
 
-def insights_for(scope: str, period: str, sort: str = 'expense_desc') -> dict:
+def insights_for(scope: str, period: str, sort: str = 'date_asc') -> dict:
     ctx = month_context(period) if scope == 'day' else year_context(period)
     ctx['scope'] = scope
     ctx['period'] = period
-    ctx['sort'] = sort if sort in SORTS else 'expense_desc'
+    ctx['sort'] = sort if sort in SORTS else 'date_asc'
     ctx['rows'] = list_rows(scope, period, ctx['sort'])
     return ctx

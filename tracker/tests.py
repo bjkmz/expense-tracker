@@ -359,6 +359,20 @@ class InsightsPanelTests(TestCase):
         inc_d = list_rows('day', '2026-04-15', 'income_desc')
         self.assertEqual(inc_d[0]['label'], '3')  # bonus day first
 
+    def test_list_default_order_is_chronological(self):
+        from tracker.services.insights import list_rows
+
+        default = list_rows('day', '2026-04-15')
+        keys = [r['key'] for r in default]
+        self.assertEqual(keys, sorted(keys))
+        desc = list_rows('day', '2026-04-15', 'date_desc')
+        self.assertEqual([r['key'] for r in desc], sorted(keys, reverse=True))
+        bogus = list_rows('day', '2026-04-15', 'nope')
+        self.assertEqual([r['key'] for r in bogus], keys)
+        mdef = list_rows('month', '2026-04')
+        mkeys = [r['key'] for r in mdef]
+        self.assertEqual(mkeys, sorted(mkeys))
+
     def test_chart_cache_roundtrip_and_invalidation(self):
         import re
 
