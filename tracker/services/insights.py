@@ -155,7 +155,7 @@ def list_rows(scope: str, period: str, sort: str = 'date_asc') -> list[dict]:
                 b['expense'] += amt
                 if r['category__name'] in b['cats']:
                     b['cats'][r['category__name']] += amt
-        rows = [b for b in buckets.values() if b['income'] or b['expense']]
+        rows = list(buckets.values())
     else:
         y, m, _ = map(int, period.split('-'))
         base = Expense.objects.filter(date__year=y, date__month=m)
@@ -175,7 +175,7 @@ def list_rows(scope: str, period: str, sort: str = 'date_asc') -> list[dict]:
                 b['expense'] += amt
                 if r['category__name'] in b['cats']:
                     b['cats'][r['category__name']] += amt
-        rows = [b for b in buckets.values() if b['income'] or b['expense']]
+        rows = list(buckets.values())
 
     if sort in ('date_asc', 'date_desc'):
         rows.sort(key=lambda r: r['key'], reverse=(sort == 'date_desc'))

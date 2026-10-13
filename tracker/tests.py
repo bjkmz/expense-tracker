@@ -373,6 +373,19 @@ class InsightsPanelTests(TestCase):
         mkeys = [r['key'] for r in mdef]
         self.assertEqual(mkeys, sorted(mkeys))
 
+    def test_list_rows_keep_zero_value_periods(self):
+        from decimal import Decimal
+
+        from tracker.services.insights import list_rows
+
+        days = list_rows('day', '2026-04-15')
+        self.assertEqual(len(days), 30)  # full April run, empties included
+        zero_days = [r for r in days if not r['income'] and not r['expense']]
+        self.assertTrue(zero_days)
+        self.assertEqual(zero_days[0]['income'], Decimal('0.00'))
+        months = list_rows('month', '2026-04')
+        self.assertEqual(len(months), 12)  # full Jan-Dec run
+
     def test_chart_cache_roundtrip_and_invalidation(self):
         import re
 
