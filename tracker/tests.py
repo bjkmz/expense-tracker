@@ -373,6 +373,26 @@ class InsightsPanelTests(TestCase):
         mkeys = [r['key'] for r in mdef]
         self.assertEqual(mkeys, sorted(mkeys))
 
+    def test_sort_dropdown_flips_active_dimension(self):
+        # Single sort control: active option flips, others use natural defaults
+        body = self.client.get(
+            '/partials/insights/list/?scope=day&period=2026-04-15&sort=date_asc').content.decode()
+        self.assertIn('Sort: Date ↑', body)
+        self.assertIn('sort=date_desc', body)  # reselecting Date flips
+        self.assertIn('sort=expense_desc', body)
+        self.assertIn('sort=income_desc', body)
+        self.assertNotIn('>D↑<', body)
+        self.assertNotIn('>E↓<', body)
+        self.assertNotIn('>I↓<', body)
+        exp = self.client.get(
+            '/partials/insights/list/?scope=day&period=2026-04-15&sort=expense_desc').content.decode()
+        self.assertIn('Sort: Expense ↓', exp)
+        self.assertIn('sort=expense_asc', exp)  # reselecting Expense flips
+        self.assertIn('sort=date_asc', exp)
+        default = self.client.get('/day/2026-04-15/').content.decode()
+        self.assertIn('Sort: Date ↑', default)
+        self.assertIn('Daily rows in April 2026', default)
+
     def test_list_rows_keep_zero_value_periods(self):
         from decimal import Decimal
 

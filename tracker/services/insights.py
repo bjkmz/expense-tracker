@@ -25,6 +25,8 @@ from django.db.models import Case, When
 CATEGORY_ORDER = ['Income', 'Food', 'Transpo', 'Consumable', 'Ownership', 'Miscellaneous']
 EXPENSE_CATS = ['Food', 'Transpo', 'Consumable', 'Ownership', 'Miscellaneous']
 SORTS = ('date_asc', 'date_desc', 'expense_desc', 'expense_asc', 'income_desc', 'income_asc')
+SORT_DIMENSIONS = (('date', 'Date'), ('expense', 'Expense'), ('income', 'Income'))
+SORT_DEFAULTS = {'date': 'date_asc', 'expense': 'expense_desc', 'income': 'income_desc'}
 
 
 def _cat_totals(qs) -> dict:
@@ -193,4 +195,29 @@ def insights_for(scope: str, period: str, sort: str = 'date_asc') -> dict:
     ctx['period'] = period
     ctx['sort'] = sort if sort in SORTS else 'date_asc'
     ctx['rows'] = list_rows(scope, period, ctx['sort'])
+    ctx['rows_prefix'] = 'Daily rows in' if scope == 'day' else 'Monthly rows in'
+    ctx['sort_label'], ctx['sort_options'] = sort_menu(ctx['sort'])
     return ctx
+
+
+def sort_menu(sort: str) -> tuple[str, list[dict]]:
+    """Dropdown state: active dimension flips, others use their natural default."""
+    if sort not in SORTS:
+        sort = 'date_asc'
+    dim, _, direction = sort.rpartition('_')
+    names = dict(SORT_DIMENSIONS)
+    options = []
+    for d, name in SORT_DIMENSIONS:
+        nxt = f'{d}_asc' if (d == dim and direction == 'desc') else (f'{d}_desc' if d == dim else SORT_DEFAULTS[d])
+        options.append({'name': name, 'next': nxt,
+                        'arrow': '↑' if nxt.endswith('_asc') else '↓',
+                        'active': d == dim})
+    return f"{names[dim]} {'↑' if direction == 'asc' else '↓'}", options
+
+
+def period_caption(scope: str, period: str) -> tuple[str, str]:
+    """Sort-bar caption without building the full insights context."""
+    if scope == 'month':
+        return 'Monthly rows in', period.split('-')[0]
+    y, m, _ = map(int, period.split('-'))
+    return 'Daily rows in', date(y, m, 1).strftime('%B %Y')

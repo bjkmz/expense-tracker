@@ -415,7 +415,7 @@ def insights_chart(request):
 
 @require_GET
 def insights_list(request):
-    from tracker.services.insights import SORTS, list_rows
+    from tracker.services.insights import SORTS, list_rows, period_caption, sort_menu
 
     scope = request.GET.get('scope', 'day')
     period = request.GET.get('period', '')
@@ -428,7 +428,13 @@ def insights_list(request):
         today = timezone.localdate()
         period = today.isoformat() if scope == 'day' else today.strftime('%Y-%m')
     rows = list_rows(scope, period, sort)
-    return render(request, 'partials/insights_list.html', {'rows': rows, 'ins_scope': scope})
+    rows_prefix, rows_label = period_caption(scope, period)
+    sort_label, sort_options = sort_menu(sort)
+    return render(request, 'partials/insights_rows.html', {
+        'rows': rows, 'ins_scope': scope, 'ins_period': period,
+        'rows_prefix': rows_prefix, 'rows_label': rows_label,
+        'sort_label': sort_label, 'sort_options': sort_options,
+    })
 
 
 def day_detail(request, iso):

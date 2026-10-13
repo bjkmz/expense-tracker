@@ -97,12 +97,12 @@
       _fitChartsT = setTimeout(fitInsightCharts, 150);
     });
     document.addEventListener('htmx:afterSettle', fitInsightCharts);
-    // Records row menus: <details> never closes on outside click natively,
+    // Row/sort menus: <details> never closes on outside click natively,
     // so dismiss any open menu when the pointer lands outside it. Delegated
-    // on document (survives HTMX panel swaps); scoped to #records-list so
-    // the calendar modal and other disclosures are untouched.
+    // on document (survives HTMX swaps); scoped to #records-list and
+    // #insights-rows so the calendar modal and other disclosures are untouched.
     document.addEventListener('click', function (e) {
-      document.querySelectorAll('#records-list details[open]').forEach(function (d) {
+      document.querySelectorAll('#records-list details[open], #insights-rows details[open]').forEach(function (d) {
         if (!d.contains(e.target)) d.removeAttribute('open');
       });
     });

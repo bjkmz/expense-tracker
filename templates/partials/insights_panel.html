@@ -50,30 +50,8 @@
     </div>
   </div>
 
-  {# Sort + Filter (filter placeholder, no function yet) #}
-  <div class="flex items-center justify-end gap-2 px-3 py-2 text-slate-500">
-    <span class="text-xs mr-auto">{% if ins_scope == 'day' %}Daily rows in {{ ins.label }}{% else %}Monthly rows in {{ ins.label }}{% endif %}</span>
-    <button class="border rounded px-1 text-sm" title="Filter (placeholder, no function yet)" disabled>⧩</button>
-    <button class="border rounded px-1 text-sm" title="Date ascending"
-            hx-get="{% url 'insights-list' %}?scope={{ ins_scope }}&period={{ ins_period }}&sort=date_asc"
-            hx-target="#insights-list" hx-swap="innerHTML">D↑</button>
-    <button class="border rounded px-1 text-sm" title="Date descending"
-            hx-get="{% url 'insights-list' %}?scope={{ ins_scope }}&period={{ ins_period }}&sort=date_desc"
-            hx-target="#insights-list" hx-swap="innerHTML">D↓</button>
-    <button class="border rounded px-1 text-sm" title="Total Expense descending"
-            hx-get="{% url 'insights-list' %}?scope={{ ins_scope }}&period={{ ins_period }}&sort=expense_desc"
-            hx-target="#insights-list" hx-swap="innerHTML">E↓</button>
-    <button class="border rounded px-1 text-sm" title="Total Expense ascending"
-            hx-get="{% url 'insights-list' %}?scope={{ ins_scope }}&period={{ ins_period }}&sort=expense_asc"
-            hx-target="#insights-list" hx-swap="innerHTML">E↑</button>
-    <button class="border rounded px-1 text-sm" title="Income descending"
-            hx-get="{% url 'insights-list' %}?scope={{ ins_scope }}&period={{ ins_period }}&sort=income_desc"
-            hx-target="#insights-list" hx-swap="innerHTML">I↓</button>
-    <button class="border rounded px-1 text-sm" title="Income ascending"
-            hx-get="{% url 'insights-list' %}?scope={{ ins_scope }}&period={{ ins_period }}&sort=income_asc"
-            hx-target="#insights-list" hx-swap="innerHTML">I↑</button>
-  </div>
-  <div id="insights-list">
-    {% include "partials/insights_list.html" with rows=ins.rows ins_scope=ins_scope %}
+  {# Sort + rows: bar re-renders with the rows so the sort button shows state #}
+  <div id="insights-rows">
+    {% include "partials/insights_rows.html" with rows=ins.rows ins_scope=ins_scope ins_period=ins_period rows_prefix=ins.rows_prefix rows_label=ins.label sort_label=ins.sort_label sort_options=ins.sort_options %}
   </div>
 </div>
