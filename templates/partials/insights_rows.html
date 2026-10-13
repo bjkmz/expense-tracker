@@ -1,0 +1,19 @@
+{# Sort bar + summary rows. Re-rendered by the insights-list endpoint on every sort pick. #}
+{# Expects: rows, ins_scope, ins_period, rows_prefix, rows_label, sort_label, sort_options. #}
+<div class="mt-12 flex items-center justify-end gap-2 px-3 py-2 text-slate-500">
+  <span class="text-xs mr-auto">{{ rows_prefix }} {{ rows_label }}</span>
+  <button class="border rounded px-1 text-sm" title="Filter (placeholder, no function yet)" disabled>⧩</button>
+  <details class="relative">
+    <summary class="cursor-pointer list-none border rounded px-1 text-sm" title="Sort rows">Sort: {{ sort_label }}</summary>
+    <div class="absolute right-0 z-10 mt-1 w-max rounded bg-white border p-1 shadow-xl text-left">
+      {% for o in sort_options %}
+      <button class="w-full text-left text-sm px-2 py-1 hover:bg-neutral-100{% if o.active %} font-bold{% endif %}" title="Sort by {{ o.name }}"
+              hx-get="{% url 'insights-list' %}?scope={{ ins_scope }}&period={{ ins_period }}&sort={{ o.next }}"
+              hx-target="#insights-rows" hx-swap="innerHTML">{{ o.name }} {{ o.arrow }}</button>
+      {% endfor %}
+    </div>
+  </details>
+</div>
+<div id="insights-list">
+  {% include "partials/insights_list.html" with rows=rows ins_scope=ins_scope %}
+</div>

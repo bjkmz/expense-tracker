@@ -392,6 +392,7 @@ class InsightsPanelTests(TestCase):
         default = self.client.get('/day/2026-04-15/').content.decode()
         self.assertIn('Sort: Date ↑', default)
         self.assertIn('Daily rows in April 2026', default)
+        self.assertIn('mt-12 flex items-center justify-end', body)  # breathing gap above rows bar
 
     def test_list_rows_keep_zero_value_periods(self):
         from decimal import Decimal
