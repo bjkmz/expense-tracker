@@ -407,6 +407,33 @@ class InsightsPanelTests(TestCase):
         months = list_rows('month', '2026-04')
         self.assertEqual(len(months), 12)  # full Jan-Dec run
 
+    def test_line_chart_marks_every_point_with_category_hover(self):
+        from tracker.services.charts import build_chart_html
+        from tracker.services.insights import CATEGORY_ORDER, month_context, year_context
+
+        m = month_context('2026-04-15')
+        self.assertEqual(len(m['series']), 30)  # every day depicted, zeros included
+        for p in m['series']:
+            self.assertEqual(set(p['cats']), set(CATEGORY_ORDER))
+        yctx = year_context('2026-04')
+        self.assertEqual(len(yctx['series']), 12)
+        for p in yctx['series']:
+            self.assertEqual(set(p['cats']), set(CATEGORY_ORDER))
+
+        day = build_chart_html('day', '2026-04-15', 'line')
+        self.assertIn('lines+markers', day)
+        self.assertIn('customdata', day)
+        for cat in CATEGORY_ORDER:
+            self.assertIn(cat, day)
+        self.assertIn('Total expense', day)
+        self.assertIn('99999.99', day)  # Apr 3 Income bonus rides in hover payload
+        year = build_chart_html('month', '2026-04', 'line')
+        self.assertIn('lines+markers', year)
+        self.assertIn('customdata', year)
+        pie = build_chart_html('day', '2026-04-15', 'pie')
+        self.assertNotIn('lines+markers', pie)
+        self.assertNotIn('customdata', pie)
+
     def test_chart_cache_roundtrip_and_invalidation(self):
         import re
 

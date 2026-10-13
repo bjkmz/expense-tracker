@@ -68,15 +68,17 @@ def build_chart_html(scope: str, period: str, kind: str = 'line') -> str:
     return _line_html(ctx)
 
 
-def _fig_to_div(fig) -> str:
+def _fig_to_div(fig, static: bool = True) -> str:
     from plotly.offline import plot
 
     return plot(fig, output_type='div', include_plotlyjs=False,
-                config={'staticPlot': True, 'displayModeBar': False})
+                config={'staticPlot': static, 'displayModeBar': False})
 
 
 def _line_html(ctx: dict) -> str:
     import plotly.graph_objects as go
+
+    from tracker.services.insights import CATEGORY_ORDER
 
     series = ctx.get('series', [])
     if ctx.get('kind') == 'year':
@@ -88,7 +90,13 @@ def _line_html(ctx: dict) -> str:
     y = [p['y'] for p in series]
     if not any(y):
         return '<div class="p-6 text-center text-sm text-neutral-500">No expense data yet.</div>'
-    fig = go.Figure(go.Scatter(x=x, y=y, mode='lines', line=dict(color=LINE_COLOR, width=2)))
+    custom = [[p.get('cats', {}).get(c, 0.0) for c in CATEGORY_ORDER] for p in series]
+    cat_lines = '<br>'.join(f'{c}: %{{customdata[{i}]:.2f}}' for i, c in enumerate(CATEGORY_ORDER))
+    hover = f'<b>%{{x}}</b><br>{cat_lines}<br>Total expense: %{{y:.2f}}<extra></extra>'
+    fig = go.Figure(go.Scatter(x=x, y=y, mode='lines+markers',
+                               line=dict(color=LINE_COLOR, width=2),
+                               marker=dict(color=LINE_COLOR, size=6),
+                               customdata=custom, hovertemplate=hover))
     fig.update_layout(
         title=dict(text=title, font=dict(size=13)),
         margin=dict(l=40, r=10, t=40, b=30),
@@ -96,7 +104,7 @@ def _line_html(ctx: dict) -> str:
         xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='#E5E7EB'),
         showlegend=False,
     )
-    return _fig_to_div(fig)
+    return _fig_to_div(fig, static=False)
 
 
 def _pie_html(ctx: dict) -> str:

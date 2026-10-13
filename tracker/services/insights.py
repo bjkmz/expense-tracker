@@ -66,8 +66,14 @@ def month_context(day_iso: str) -> dict:
         exp_qs.values('date').annotate(t=Sum('amount')).order_by('date')
     )
     by_day = {r['date'].day: float(r['t']) for r in per_day}
+    per_day_cat = qs.values('date', 'category__name').annotate(t=Sum('amount'))
+    day_cats: dict[int, dict[str, float]] = {}
+    for r in per_day_cat:
+        day_cats.setdefault(r['date'].day, {})[r['category__name']] = float(r['t'])
     ndays = cal_module.monthrange(y, m)[1]
-    series = [{'x': d, 'y': round(by_day.get(d, 0.0), 2)} for d in range(1, ndays + 1)]
+    series = [{'x': d, 'y': round(by_day.get(d, 0.0), 2),
+               'cats': {c: round(day_cats.get(d, {}).get(c, 0.0), 2) for c in CATEGORY_ORDER}}
+              for d in range(1, ndays + 1)]
 
     # pie division (expense cats, month)
     pie_rows = exp_qs.values('category__name').annotate(t=Sum('amount')).order_by('-t')
@@ -105,8 +111,14 @@ def year_context(ym: str) -> dict:
 
     per_month = exp_qs.values('date__month').annotate(t=Sum('amount')).order_by('date__month')
     by_m = {r['date__month']: float(r['t']) for r in per_month}
+    per_month_cat = qs.values('date__month', 'category__name').annotate(t=Sum('amount'))
+    month_cats: dict[int, dict[str, float]] = {}
+    for r in per_month_cat:
+        month_cats.setdefault(r['date__month'], {})[r['category__name']] = float(r['t'])
     series = [{'x': mo, 'y': round(by_m.get(mo, 0.0), 2),
-               'label': date(y, mo, 1).strftime('%b')} for mo in range(1, 13)]
+               'label': date(y, mo, 1).strftime('%b'),
+               'cats': {c: round(month_cats.get(mo, {}).get(c, 0.0), 2) for c in CATEGORY_ORDER}}
+              for mo in range(1, 13)]
 
     pie_rows = exp_qs.values('category__name').annotate(t=Sum('amount')).order_by('-t')
     pie = [{'label': r['category__name'], 'value': float(r['t'])} for r in pie_rows if r['t']]
