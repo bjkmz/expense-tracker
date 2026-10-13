@@ -246,6 +246,17 @@ class RecordsPanelTests(TestCase):
             self.assertIn('insights-chart-box', body)
             self.assertIn('fitInsightCharts', body)
 
+    def test_panels_have_independent_scroll_areas(self):
+        # Page locks to viewport height on desktop; each column scrolls alone:
+        # records rows scroll under fixed head/add-row, insights scroll under
+        # the sticky chart card, calendar aside scrolls itself
+        for url in ('/day/2026-04-15/', '/month/2026-04/'):
+            body = self.client.get(url).content.decode()
+            self.assertIn('lg:h-screen', body)
+            self.assertIn('lg:overflow-hidden', body)
+            self.assertIn('id="records-list" class="flex-1 min-h-0 lg:overflow-y-auto"', body)
+            self.assertIn('lg:w-1/2 lg:h-screen lg:overflow-y-auto', body)
+
     def test_create_update_move_delete_roundtrip(self):
         # create
         r = self.client.post(
