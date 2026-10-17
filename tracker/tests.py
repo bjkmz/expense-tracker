@@ -631,6 +631,16 @@ class HomeInsightsTests(TestCase):
         body = self.client.get('/').content.decode()
         self.assertIn('md:sticky md:top-0 md:h-screen md:overflow-y-auto', body)
 
+    def test_home_toggle_flush_with_aside_edge(self):
+        # Aside width and toggle offset share one reference (fractions, not vw),
+        # so the tab's flat edge stays flush regardless of scrollbar width.
+        body = self.client.get('/').content.decode()
+        self.assertIn('md:w-1/4', body)
+        self.assertIn('fixed right-3/4', body)
+        self.assertIn("'right-3/4'", body)  # toggle JS re-adds the same class
+        self.assertNotIn('w-[25vw]', body)
+        self.assertNotIn('right-[75vw]', body)
+
     def test_home_insights_all_data_scopes(self):
         yearly = self.client.get('/partials/home/insights/', {'scope': 'yearly', 'period': 'all'})
         self.assertEqual(yearly.status_code, 200)
