@@ -3,7 +3,7 @@
 {% block content %}
 <div class="min-h-screen flex flex-col md:flex-row">
   {# Desktop / tablet collapsible aside. Hidden on mobile (modal instead). #}
-  <aside id="sidenav" class="hidden md:flex bg-neutral-700 text-neutral-100 md:w-[25vw] shrink-0 flex-col">
+  <aside id="sidenav" class="hidden md:flex md:sticky md:top-0 md:h-screen md:overflow-y-auto bg-neutral-700 text-neutral-100 md:w-[25vw] shrink-0 flex-col">
     {% include "partials/calendar_panel.html" with mode="desktop" collapsible=True %}
   </aside>
   {# Unified toggle: inside sidenav edge when open, docked at viewport edge when closed. #}

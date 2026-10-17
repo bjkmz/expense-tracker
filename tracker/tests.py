@@ -626,6 +626,11 @@ class HomeInsightsTests(TestCase):
         body = self.client.get('/day/2026-04-15/').content.decode()
         self.assertIn('sticky top-1', body)
 
+    def test_home_calendar_aside_is_pinned(self):
+        # Desktop calendar stays in view while the home page scrolls.
+        body = self.client.get('/').content.decode()
+        self.assertIn('md:sticky md:top-0 md:h-screen md:overflow-y-auto', body)
+
     def test_home_insights_all_data_scopes(self):
         yearly = self.client.get('/partials/home/insights/', {'scope': 'yearly', 'period': 'all'})
         self.assertEqual(yearly.status_code, 200)
