@@ -21,8 +21,8 @@
               onclick="document.getElementById('add-modal').showModal()">⊕ ADD RECORD</button>
     </div>
     <div id="home-toast" class="hidden mx-auto my-2 max-w-md px-4 py-2 rounded bg-green-100 text-green-800 text-sm text-center"></div>
-    <section class="bg-neutral-200 min-h-[50vh] flex items-center justify-center">
-      <p class="text-neutral-500">[ INSIGHTS SECTION ] — blank in P2, wired in P4 ({{ today }})</p>
+    <section class="bg-white border-t pb-4">
+      {% include "partials/home_insights.html" %}
     </section>
   </main>
 

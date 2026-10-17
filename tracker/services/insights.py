@@ -54,6 +54,25 @@ def _costliest(qs, category_name: str):
     )
 
 
+def _rollup(qs) -> dict:
+    """Shared pie + category totals + net + insight cards for a scope queryset."""
+    exp_qs = qs.exclude(category__name='Income')
+    pie_rows = exp_qs.values('category__name').annotate(t=Sum('amount')).order_by('-t')
+    pie = [{'label': r['category__name'], 'value': float(r['t'])} for r in pie_rows if r['t']]
+    totals = _cat_totals(qs)
+    hi = qs.filter(category__name='Income').order_by('-amount', '-date').first()
+    cards = {
+        'highest_income': {'amount': hi.amount if hi else Decimal('0.00'), 'when': hi.date if hi else None},
+        'top_food': _top_item(qs, 'Food'),
+        'top_transpo': _top_item(qs, 'Transpo'),
+        'costly_consumable': _costliest(qs, 'Consumable'),
+        'costly_ownership': _costliest(qs, 'Ownership'),
+        'costly_misc': _costliest(qs, 'Miscellaneous'),
+    }
+    net = totals['Income'] - sum((v for k, v in totals.items() if k != 'Income'), Decimal('0.00'))
+    return {'pie': pie, 'totals': totals, 'net': net, 'cards': cards}
+
+
 def month_context(day_iso: str) -> dict:
     from tracker.models import Expense
 
@@ -75,31 +94,10 @@ def month_context(day_iso: str) -> dict:
                'cats': {c: round(day_cats.get(d, {}).get(c, 0.0), 2) for c in CATEGORY_ORDER}}
               for d in range(1, ndays + 1)]
 
-    # pie division (expense cats, month)
-    pie_rows = exp_qs.values('category__name').annotate(t=Sum('amount')).order_by('-t')
-    pie = [{'label': r['category__name'], 'value': float(r['t'])} for r in pie_rows if r['t']]
-
-    totals = _cat_totals(qs)
-    hi = qs.filter(category__name='Income').order_by('-amount', '-date').first()
-    cards = {
-        'highest_income': {'amount': hi.amount if hi else Decimal('0.00'), 'when': hi.date if hi else None},
-        'top_food': _top_item(qs, 'Food'),
-        'top_transpo': _top_item(qs, 'Transpo'),
-        'costly_consumable': _costliest(qs, 'Consumable'),
-        'costly_ownership': _costliest(qs, 'Ownership'),
-        'costly_misc': _costliest(qs, 'Miscellaneous'),
-    }
-    return {
-        'kind': 'month',
-        'year': y,
-        'month': m,
-        'label': date(y, m, 1).strftime('%B %Y'),
-        'series': series,
-        'pie': pie,
-        'totals': totals,
-        'net': totals['Income'] - sum((v for k, v in totals.items() if k != 'Income'), Decimal('0.00')),
-        'cards': cards,
-    }
+    ctx = _rollup(qs)
+    ctx.update({'kind': 'month', 'year': y, 'month': m,
+                'label': date(y, m, 1).strftime('%B %Y'), 'series': series})
+    return ctx
 
 
 def year_context(ym: str) -> dict:
@@ -120,29 +118,49 @@ def year_context(ym: str) -> dict:
                'cats': {c: round(month_cats.get(mo, {}).get(c, 0.0), 2) for c in CATEGORY_ORDER}}
               for mo in range(1, 13)]
 
-    pie_rows = exp_qs.values('category__name').annotate(t=Sum('amount')).order_by('-t')
-    pie = [{'label': r['category__name'], 'value': float(r['t'])} for r in pie_rows if r['t']]
+    ctx = _rollup(qs)
+    ctx.update({'kind': 'year', 'year': y, 'label': str(y), 'series': series})
+    return ctx
 
-    totals = _cat_totals(qs)
-    hi = qs.filter(category__name='Income').order_by('-amount', '-date').first()
-    cards = {
-        'highest_income': {'amount': hi.amount if hi else Decimal('0.00'), 'when': hi.date if hi else None},
-        'top_food': _top_item(qs, 'Food'),
-        'top_transpo': _top_item(qs, 'Transpo'),
-        'costly_consumable': _costliest(qs, 'Consumable'),
-        'costly_ownership': _costliest(qs, 'Ownership'),
-        'costly_misc': _costliest(qs, 'Miscellaneous'),
-    }
-    return {
-        'kind': 'year',
-        'year': y,
-        'label': str(y),
-        'series': series,
-        'pie': pie,
-        'totals': totals,
-        'net': totals['Income'] - sum((v for k, v in totals.items() if k != 'Income'), Decimal('0.00')),
-        'cards': cards,
-    }
+
+def all_context(granularity: str) -> dict:
+    """All-data context: granularity 'yearly' (point per year) or 'monthly' (point per month)."""
+    from tracker.models import Expense
+
+    qs = Expense.objects.all()
+    exp_qs = qs.exclude(category__name='Income')
+
+    if granularity == 'yearly':
+        years = sorted(set(qs.values_list('date__year', flat=True)))
+        by = {r['date__year']: float(r['t'])
+              for r in exp_qs.values('date__year').annotate(t=Sum('amount'))}
+        cats: dict = {}
+        for r in qs.values('date__year', 'category__name').annotate(t=Sum('amount')):
+            cats.setdefault(r['date__year'], {})[r['category__name']] = float(r['t'])
+        series = [{'x': y, 'y': round(by.get(y, 0.0), 2), 'label': str(y),
+                   'cats': {c: round(cats.get(y, {}).get(c, 0.0), 2) for c in CATEGORY_ORDER}}
+                  for y in years]
+    else:
+        spans = sorted(set(qs.values_list('date__year', 'date__month')))
+        seq: list[tuple[int, int]] = []
+        if spans:
+            (y, m), (y1, m1) = spans[0], spans[-1]
+            while (y, m) <= (y1, m1):
+                seq.append((y, m))
+                m, y = (1, y + 1) if m == 12 else (m + 1, y)
+        by = {(r['date__year'], r['date__month']): float(r['t'])
+              for r in exp_qs.values('date__year', 'date__month').annotate(t=Sum('amount'))}
+        cats = {}
+        for r in qs.values('date__year', 'date__month', 'category__name').annotate(t=Sum('amount')):
+            cats.setdefault((r['date__year'], r['date__month']), {})[r['category__name']] = float(r['t'])
+        series = [{'x': f'{y}-{m:02d}', 'y': round(by.get((y, m), 0.0), 2),
+                   'label': date(y, m, 1).strftime('%b %Y'),
+                   'cats': {c: round(cats.get((y, m), {}).get(c, 0.0), 2) for c in CATEGORY_ORDER}}
+                  for y, m in seq]
+
+    ctx = _rollup(qs)
+    ctx.update({'kind': granularity, 'label': 'All Data', 'series': series})
+    return ctx
 
 
 def list_rows(scope: str, period: str, sort: str = 'date_asc') -> list[dict]:
@@ -151,7 +169,24 @@ def list_rows(scope: str, period: str, sort: str = 'date_asc') -> list[dict]:
 
     if sort not in SORTS:
         sort = 'date_asc'
-    if scope == 'month':
+    if scope in ('yearly', 'overall'):
+        years = sorted(set(Expense.objects.values_list('date__year', flat=True)))
+        buckets = {}
+        for y in years:
+            buckets[str(y)] = {'key': str(y), 'label': str(y), 'income': Decimal('0.00'),
+                               'expense': Decimal('0.00'), 'cats': {c: Decimal('0.00') for c in EXPENSE_CATS}}
+        agg = Expense.objects.values('date__year', 'category__name').annotate(t=Sum('amount'))
+        for r in agg:
+            b = buckets[str(r['date__year'])]
+            amt = r['t'] or Decimal('0.00')
+            if r['category__name'] == 'Income':
+                b['income'] += amt
+            else:
+                b['expense'] += amt
+                if r['category__name'] in b['cats']:
+                    b['cats'][r['category__name']] += amt
+        rows = list(buckets.values())
+    elif scope == 'month':
         y = int(period.split('-')[0])
         base = Expense.objects.filter(date__year=y)
         buckets: dict[str, dict] = {}
@@ -202,12 +237,25 @@ def list_rows(scope: str, period: str, sort: str = 'date_asc') -> list[dict]:
 
 
 def insights_for(scope: str, period: str, sort: str = 'date_asc') -> dict:
-    ctx = month_context(period) if scope == 'day' else year_context(period)
+    if scope == 'day':
+        ctx = month_context(period)
+    elif scope == 'month':
+        ctx = year_context(period)
+    elif scope == 'yearly':
+        ctx = all_context('yearly')
+    else:
+        scope = 'overall'
+        ctx = all_context('monthly')
     ctx['scope'] = scope
     ctx['period'] = period
     ctx['sort'] = sort if sort in SORTS else 'date_asc'
     ctx['rows'] = list_rows(scope, period, ctx['sort'])
-    ctx['rows_prefix'] = 'Daily rows in' if scope == 'day' else 'Monthly rows in'
+    if scope == 'day':
+        ctx['rows_prefix'] = 'Daily rows in'
+    elif scope == 'month':
+        ctx['rows_prefix'] = 'Monthly rows in'
+    else:
+        ctx['rows_prefix'] = 'Yearly rows across'
     ctx['sort_label'], ctx['sort_options'] = sort_menu(ctx['sort'])
     return ctx
 
@@ -229,6 +277,8 @@ def sort_menu(sort: str) -> tuple[str, list[dict]]:
 
 def period_caption(scope: str, period: str) -> tuple[str, str]:
     """Sort-bar caption without building the full insights context."""
+    if scope in ('yearly', 'overall'):
+        return 'Yearly rows across', 'All Data'
     if scope == 'month':
         return 'Monthly rows in', period.split('-')[0]
     y, m, _ = map(int, period.split('-'))

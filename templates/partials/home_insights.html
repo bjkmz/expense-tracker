@@ -1,0 +1,22 @@
+{# Home insights section: mode buttons + non-sticky panel. Re-rendered by calendar events and mode clicks. #}
+{# Expects: ins_scope, ins_period, ins, chart_type, chart_flipped, chart_html. #}
+<div id="home-insights" data-scope="{{ ins_scope }}">
+  {# Event driver is a leaf child: a container would leak hx-vals/hx-get to the buttons below. #}
+  <div class="hidden" aria-hidden="true"
+       hx-get="{% url 'home-insights' %}"
+       hx-trigger="cal-period from:body delay:100ms"
+       hx-vals='js:{scope: event.detail.scope, period: event.detail.period}'
+       hx-target="#home-insights" hx-swap="outerHTML"></div>
+  {# All-data abstractions: Yearly = per-year graph, Overall = per-month graph #}
+  <div class="flex gap-2 px-3 pt-3">
+    <button class="border rounded px-3 py-1 text-sm {% if ins_scope == 'yearly' %}bg-neutral-800 text-white{% else %}hover:bg-neutral-100{% endif %}"
+            title="All data, one point per year"
+            hx-get="{% url 'home-insights' %}?scope=yearly&period=all"
+            hx-target="#home-insights" hx-swap="outerHTML">Yearly</button>
+    <button class="border rounded px-3 py-1 text-sm {% if ins_scope == 'overall' %}bg-neutral-800 text-white{% else %}hover:bg-neutral-100{% endif %}"
+            title="All data, one point per month"
+            hx-get="{% url 'home-insights' %}?scope=overall&period=all"
+            hx-target="#home-insights" hx-swap="outerHTML">Overall</button>
+  </div>
+  {% include 'partials/insights_panel.html' with panel_layout='home' %}
+</div>

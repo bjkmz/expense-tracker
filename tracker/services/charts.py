@@ -26,7 +26,9 @@ PIE_COLORS = {
 LINE_COLOR = '#60A5FA'
 
 
-def _range_for(scope: str, period: str) -> tuple[date, date]:
+def _range_for(scope: str, period: str) -> tuple[date | None, date | None]:
+    if scope in ('yearly', 'overall'):
+        return None, None
     if scope == 'month':
         y = int(period.split('-')[0])
         return date(y, 1, 1), date(y, 12, 31)
@@ -39,7 +41,8 @@ def scope_max_iso(scope: str, period: str) -> str | None:
     from tracker.models import Expense
 
     start, end = _range_for(scope, period)
-    m = Expense.objects.filter(date__gte=start, date__lte=end).aggregate(m=Max('updated_at'))['m']
+    qs = Expense.objects.all() if start is None else Expense.objects.filter(date__gte=start, date__lte=end)
+    m = qs.aggregate(m=Max('updated_at'))['m']
     return m.isoformat() if m else None
 
 
@@ -60,9 +63,16 @@ def get_chart_html(scope: str, period: str, kind: str = 'line') -> tuple[str, bo
 
 
 def build_chart_html(scope: str, period: str, kind: str = 'line') -> str:
-    from tracker.services.insights import month_context, year_context
+    from tracker.services.insights import all_context, month_context, year_context
 
-    ctx = month_context(period) if scope == 'day' else year_context(period)
+    if scope == 'day':
+        ctx = month_context(period)
+    elif scope == 'month':
+        ctx = year_context(period)
+    elif scope == 'yearly':
+        ctx = all_context('yearly')
+    else:
+        ctx = all_context('monthly')
     if kind == 'pie':
         return _pie_html(ctx)
     return _line_html(ctx)
@@ -81,9 +91,15 @@ def _line_html(ctx: dict) -> str:
     from tracker.services.insights import CATEGORY_ORDER
 
     series = ctx.get('series', [])
-    if ctx.get('kind') == 'year':
+    kind = ctx.get('kind')
+    if kind in ('year', 'yearly', 'monthly'):
         x = [p['label'] for p in series]
-        title = f"Monthly Expenses — {ctx['label']}"
+        if kind == 'year':
+            title = f"Monthly Expenses — {ctx['label']}"
+        elif kind == 'yearly':
+            title = "Yearly Expenses — All Data"
+        else:
+            title = "Monthly Expenses — All Data"
     else:
         x = [p['x'] for p in series]
         title = f"Daily Expenses — {ctx['label']}"
@@ -116,7 +132,13 @@ def _pie_html(ctx: dict) -> str:
     labels = [p['label'] for p in pie]
     values = [p['value'] for p in pie]
     colors = [PIE_COLORS.get(lb, '#D1D5DB') for lb in labels]
-    title = f"Year Categories Division — {ctx['label']}" if ctx.get('kind') == 'year' else f"Month Categories Division — {ctx['label']}"
+    kind = ctx.get('kind')
+    if kind == 'year':
+        title = f"Year Categories Division — {ctx['label']}"
+    elif kind in ('yearly', 'monthly'):
+        title = "Categories Division — All Data"
+    else:
+        title = f"Month Categories Division — {ctx['label']}"
     fig = go.Figure(go.Pie(labels=labels, values=values, hole=0, marker=dict(colors=colors),
                            textinfo='label+percent', sort=False))
     fig.update_layout(

@@ -20,4 +20,6 @@ urlpatterns = [
     # Insights partials (HTMX toggle/sort targets)
     path('partials/insights/chart/', views.insights_chart, name='insights-chart'),
     path('partials/insights/list/', views.insights_list, name='insights-list'),
+    # Home insights section (calendar-driven + Yearly/Overall scopes)
+    path('partials/home/insights/', views.home_insights, name='home-insights'),
 ]

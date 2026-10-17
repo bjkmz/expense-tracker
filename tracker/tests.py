@@ -600,3 +600,99 @@ class HomeModalTests(TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertIn('Panel Bun', r.content.decode())
         self.assertNotIn('record-created', r.headers.get('HX-Trigger', ''))
+
+
+@override_settings(
+    HEATMAP_STATS_PATH=settings.BASE_DIR / 'tmp' / 'test_heatmap_stats.json',
+    CHART_CACHE_DIR=settings.BASE_DIR / 'tmp' / 'test_charts_home',
+)
+class HomeInsightsTests(TestCase):
+    def setUp(self):
+        call_command('seed_demo', '--clear')
+
+    def test_home_renders_insights_section_with_mode_buttons(self):
+        from django.utils import timezone
+
+        body = self.client.get('/').content.decode()
+        self.assertIn('id="home-insights"', body)
+        self.assertIn('>Yearly<', body)
+        self.assertIn('>Overall<', body)
+        month_label = timezone.localdate().strftime('%B %Y')
+        self.assertIn(f'Daily rows in {month_label}', body)  # calendar-driven default
+        self.assertIn('Sort: Date ↑', body)
+        self.assertNotIn('sticky top-1', body)  # home panel scrolls, never sticks
+
+    def test_records_page_panel_stays_sticky(self):
+        body = self.client.get('/day/2026-04-15/').content.decode()
+        self.assertIn('sticky top-1', body)
+
+    def test_home_insights_all_data_scopes(self):
+        yearly = self.client.get('/partials/home/insights/', {'scope': 'yearly', 'period': 'all'})
+        self.assertEqual(yearly.status_code, 200)
+        ybody = yearly.content.decode()
+        self.assertIn('data-scope="yearly"', ybody)
+        self.assertIn('Yearly Expenses', ybody)
+        self.assertIn('Yearly rows across All Data', ybody)
+        self.assertIn('customdata', ybody)
+        overall = self.client.get('/partials/home/insights/', {'scope': 'overall', 'period': 'all'})
+        obody = overall.content.decode()
+        self.assertIn('data-scope="overall"', obody)
+        self.assertIn('Monthly Expenses', obody)
+        self.assertIn('All Data', obody)
+        self.assertIn('Yearly rows across All Data', obody)
+        pie = self.client.get(
+            '/partials/insights/chart/', {'scope': 'overall', 'period': 'all', 'type': 'pie'}
+        )
+        self.assertEqual(pie.status_code, 200)
+        self.assertNotIn('lines+markers', pie.content.decode())
+
+    def test_all_context_year_and_month_series(self):
+        from django.utils import timezone
+
+        from tracker.services.insights import SORTS, all_context, list_rows
+
+        years = sorted(set(Expense.objects.values_list('date__year', flat=True)))
+        yctx = all_context('yearly')
+        self.assertEqual([p['label'] for p in yctx['series']], [str(y) for y in years])
+        mctx = all_context('monthly')
+        self.assertEqual(mctx['series'][0]['label'], 'May 2025')  # baseline start
+        self.assertEqual(mctx['series'][-1]['label'], timezone.localdate().strftime('%b %Y'))
+        rows = list_rows('yearly', 'all')
+        self.assertEqual([r['label'] for r in rows], [str(y) for y in years])
+        self.assertEqual(len(list_rows('overall', 'all')), len(years))
+        self.assertIn('date_asc', SORTS)  # sort keys apply to yearly rows too
+        desc = list_rows('yearly', 'all', 'income_desc')
+        self.assertGreaterEqual(desc[0]['income'], desc[-1]['income'])
+
+    def test_calendar_partials_emit_cal_period_trigger(self):
+        import json
+
+        day = self.client.get('/partials/calendar/day/', {'ym': '2026-04'})
+        self.assertEqual(
+            json.loads(day.headers['HX-Trigger']),
+            {'cal-period': {'scope': 'day', 'period': '2026-04-01'}},
+        )
+        month = self.client.get('/partials/calendar/month/', {'y': 2026})
+        self.assertEqual(
+            json.loads(month.headers['HX-Trigger']),
+            {'cal-period': {'scope': 'month', 'period': '2026-01'}},
+        )
+
+    def test_home_insights_trigger_is_isolated_leaf(self):
+        body = self.client.get('/').content.decode()
+        # The container must not carry event attributes, or descendants inherit
+        # hx-vals and their own clicks send scope/period=undefined (issue: 500).
+        wrapper = body[body.index('id="home-insights"'):]
+        wrapper = wrapper[:wrapper.index('>')]
+        self.assertNotIn('hx-vals', wrapper)
+        self.assertNotIn('hx-get', wrapper)
+        self.assertIn('hx-target="#home-insights"', body)
+
+    def test_bad_period_falls_back_instead_of_500(self):
+        for path, params in (
+            ('/partials/insights/chart/', {'scope': 'yearly', 'period': 'undefined', 'type': 'line'}),
+            ('/partials/insights/list/', {'scope': 'day', 'period': 'undefined'}),
+            ('/partials/home/insights/', {'scope': 'month', 'period': 'undefined'}),
+        ):
+            r = self.client.get(path, params)
+            self.assertEqual(r.status_code, 200, path)

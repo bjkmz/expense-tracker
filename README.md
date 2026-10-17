@@ -35,7 +35,7 @@ April-2026 anchors (Rice x12, Jeepney x20, bonus 99999.99, Cabinet spike).
 | Task              | Command                            |
 |-------------------|------------------------------------|
 | Run dev server    | `python manage.py runserver`       |
-| Run tests         | `python manage.py test tracker` (31 tests) |
+| Run tests         | `python manage.py test tracker` (52 tests) |
 | Reseed demo data  | `python manage.py seed_demo --clear` |
 | Schema changes    | `python manage.py makemigrations` / `migrate` |
 | Admin UI          | `python manage.py createsuperuser`, then `/admin/` |
@@ -46,6 +46,12 @@ April-2026 anchors (Rice x12, Jeepney x20, bonus 99999.99, Cabinet spike).
   `ADD RECORD` button opening a modal (item, category, amount; recorded as today,
   Cancel/Save). Saving closes the modal, shows a toast, and refreshes the
   calendar in place. Mobile uses a bottom bar with a full-screen calendar modal.
+  Below the add button sits the insights section — the records-panel insights
+  (line/pie toggle, summary, cards, sortable rows) but non-sticky, so the whole
+  page scrolls. The calendar drives it: the Day tab shows that month's daily
+  insights, the Month tab that year's monthly insights. A `Yearly`/`Overall`
+  button row switches to all-data views (per-year graph / per-month graph,
+  yearly rows); any calendar interaction returns to calendar-driven mode.
 - **Calendar** — day cells show day no. + day income/expense; month cells show
   month + totals. Green = today/this month, red = expense over 5x the all-time
   average, blue = non-zero expense under 80% of the median. Click a cell to open
@@ -68,6 +74,8 @@ tracker/           models, views, urls, admin, tests
   services/        heatmap.py, records.py, insights.py, charts.py, cache.py
   management/commands/seed_demo.py
 templates/         base.html, home.html, records_page.html, partials/*
+  partials/        home_insights.html, insights_panel.html, insights_chart.html,
+                   insights_rows.html, insights_list.html, calendar_*, records_*
 public/ + static/  static files (STATICFILES_DIRS)
 tmp/               gitignored: charts/, cache/, heatmap_stats.json
 reference/         outline.txt + interface sketches 1.png-7.png
@@ -96,5 +104,5 @@ reference/         outline.txt + interface sketches 1.png-7.png
 
 ## Out of scope (intentional)
 
-Profile row placeholder (no accounts), blank home insights section per the
-outline, non-functional Filter button, SQLite single-user store.
+Profile row placeholder (no accounts), non-functional Filter button, SQLite
+single-user store.

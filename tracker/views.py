@@ -1,4 +1,5 @@
 import calendar as cal_module
+import json
 from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
 
@@ -12,22 +13,45 @@ from django.views.decorators.http import require_GET, require_POST
 from tracker.services.heatmap import compact_amount, get_heatmap_stats, highlight_day, highlight_month
 from tracker.services.records import day_panel_data, month_panel_data
 
+SCOPES = ('day', 'month', 'yearly', 'overall')
+
+
+def _default_period(scope: str, today: date) -> str:
+    if scope == 'day':
+        return today.isoformat()
+    if scope == 'month':
+        return today.strftime('%Y-%m')
+    return 'all'
+
+
+def _safe_period(scope: str, raw: str | None, today: date) -> str:
+    """Validate a request period; fall back to the scope default on anything malformed."""
+    raw = (raw or '').strip()
+    try:
+        if scope == 'day':
+            return date.fromisoformat(raw).isoformat()
+        if scope == 'month':
+            y, m = map(int, raw.split('-'))
+            assert 1 <= m <= 12
+            return f'{y:04d}-{m:02d}'
+    except (ValueError, AssertionError):
+        return _default_period(scope, today)
+    return 'all'
+
 
 def home(request):
     from tracker.models import Category
 
     today = timezone.localdate()
-    return render(
-        request,
-        'home.html',
-        {
-            'today': today,
-            'today_iso': today.isoformat(),
-            'default_ym': today.strftime('%Y-%m'),
-            'default_y': today.year,
-            'categories': list(Category.objects.order_by('name')),
-        },
-    )
+    ctx = {
+        'today': today,
+        'today_iso': today.isoformat(),
+        'default_ym': today.strftime('%Y-%m'),
+        'default_y': today.year,
+        'categories': list(Category.objects.order_by('name')),
+    }
+    ctx.update(_insights_ctx('day', today.isoformat()))
+    return render(request, 'home.html', ctx)
 
 
 def calendar_day_stub(request):
@@ -107,9 +131,9 @@ def calendar_day(request):
         'next_ym': next_ym,
         'cells': cells,
     }
-    if request.headers.get('HX-Request'):
-        return render(request, 'partials/calendar_day.html', ctx)
-    return render(request, 'partials/calendar_day.html', ctx)
+    response = render(request, 'partials/calendar_day.html', ctx)
+    response['HX-Trigger'] = json.dumps({'cal-period': {'scope': 'day', 'period': f'{ym}-01'}})
+    return response
 
 
 def calendar_month(request):
@@ -155,7 +179,9 @@ def calendar_month(request):
         )
 
     ctx = {'y': y, 'prev_y': y - 1, 'next_y': y + 1, 'cells': cells}
-    return render(request, 'partials/calendar_month.html', ctx)
+    response = render(request, 'partials/calendar_month.html', ctx)
+    response['HX-Trigger'] = json.dumps({'cal-period': {'scope': 'month', 'period': f'{y}-01'}})
+    return response
 
 
 def _parse_iso_day(raw: str | None, fallback: date) -> date:
@@ -392,13 +418,10 @@ def _insights_ctx(scope: str, period: str, chart_type: str = 'line', sort: str =
 @require_GET
 def insights_chart(request):
     scope = request.GET.get('scope', 'day')
-    period = request.GET.get('period', '')
-    kind = request.GET.get('type', 'line')
-    if scope not in ('day', 'month'):
+    if scope not in SCOPES:
         scope = 'day'
-    if not period:
-        today = timezone.localdate()
-        period = today.isoformat() if scope == 'day' else today.strftime('%Y-%m')
+    period = _safe_period(scope, request.GET.get('period'), timezone.localdate())
+    kind = request.GET.get('type', 'line')
     from tracker.services.charts import get_chart_html
 
     if kind not in ('line', 'pie'):
@@ -418,15 +441,12 @@ def insights_list(request):
     from tracker.services.insights import SORTS, list_rows, period_caption, sort_menu
 
     scope = request.GET.get('scope', 'day')
-    period = request.GET.get('period', '')
-    sort = request.GET.get('sort', 'date_asc')
-    if scope not in ('day', 'month'):
+    if scope not in SCOPES:
         scope = 'day'
+    sort = request.GET.get('sort', 'date_asc')
     if sort not in SORTS:
         sort = 'date_asc'
-    if not period:
-        today = timezone.localdate()
-        period = today.isoformat() if scope == 'day' else today.strftime('%Y-%m')
+    period = _safe_period(scope, request.GET.get('period'), timezone.localdate())
     rows = list_rows(scope, period, sort)
     rows_prefix, rows_label = period_caption(scope, period)
     sort_label, sort_options = sort_menu(sort)
@@ -435,6 +455,18 @@ def insights_list(request):
         'rows_prefix': rows_prefix, 'rows_label': rows_label,
         'sort_label': sort_label, 'sort_options': sort_options,
     })
+
+
+@require_GET
+def home_insights(request):
+    scope = request.GET.get('scope', 'day')
+    if scope not in SCOPES:
+        scope = 'day'
+    period = _safe_period(scope, request.GET.get('period'), timezone.localdate())
+    chart = request.GET.get('chart', 'line')
+    sort = request.GET.get('sort', 'date_asc')
+    ctx = _insights_ctx(scope, period, chart, sort)
+    return render(request, 'partials/home_insights.html', ctx)
 
 
 def day_detail(request, iso):
