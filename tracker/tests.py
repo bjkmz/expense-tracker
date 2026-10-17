@@ -687,6 +687,12 @@ class HomeInsightsTests(TestCase):
         self.assertNotIn('hx-vals', wrapper)
         self.assertNotIn('hx-get', wrapper)
         self.assertIn('hx-target="#home-insights"', body)
+        # A `delay` trigger runs in setTimeout, where window.event is null, so
+        # hx-vals' `event.detail` throws and the insights refresh is aborted.
+        trigger = body[body.index('hx-trigger="cal-period'):]
+        trigger = trigger[:trigger.index('"', trigger.index('"') + 1)]
+        self.assertIn('from:body', trigger)
+        self.assertNotIn('delay', trigger)
 
     def test_bad_period_falls_back_instead_of_500(self):
         for path, params in (

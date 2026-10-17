@@ -4,7 +4,7 @@
   {# Event driver is a leaf child: a container would leak hx-vals/hx-get to the buttons below. #}
   <div class="hidden" aria-hidden="true"
        hx-get="{% url 'home-insights' %}"
-       hx-trigger="cal-period from:body delay:100ms"
+       hx-trigger="cal-period from:body"
        hx-vals='js:{scope: event.detail.scope, period: event.detail.period}'
        hx-target="#home-insights" hx-swap="outerHTML"></div>
   {# All-data abstractions: Yearly = per-year graph, Overall = per-month graph #}
