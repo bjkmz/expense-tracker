@@ -113,6 +113,17 @@ class CalendarHeatmapTests(TestCase):
         self.assertIn('?y=2025', body)
         self.assertIn('?y=2027', body)
 
+    def test_calendar_partials_include_legend(self):
+        for url, params in (
+            ('/partials/calendar/day/', {'ym': '2026-04'}),
+            ('/partials/calendar/month/', {'y': '2026'}),
+        ):
+            body = self.client.get(url, params).content.decode()
+            for label in ('Today / this month', 'Spike &gt;5× avg', 'Low &lt;80% median'):
+                self.assertIn(label, body)
+            for swatch in ('bg-green-300/70', 'bg-red-300/70', 'bg-blue-200/70'):
+                self.assertIn(swatch, body)
+
     def test_active_day_cell_is_marked(self):
         r = self.client.get(
             '/partials/calendar/day/',
