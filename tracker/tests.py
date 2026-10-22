@@ -152,6 +152,22 @@ class RecordsPanelTests(TestCase):
         # jump pickers live in the calendar headers only, not the records head
         self.assertNotIn('type="month"', body)
 
+    def test_month_page_side_calendar_opens_month_tab(self):
+        body = self.client.get('/month/2026-04/').content.decode()
+        self.assertIn(
+            'class="flex-1 border rounded py-1 text-sm cal-tab-active" '
+            'onclick="setCalTab(this)" hx-get="/partials/calendar/month/?y=2026"',
+            body,
+        )
+
+    def test_day_page_side_calendar_opens_day_tab(self):
+        body = self.client.get('/day/2026-04-15/').content.decode()
+        self.assertIn(
+            'class="flex-1 border rounded py-1 text-sm cal-tab-active" '
+            'onclick="setCalTab(this)" hx-get="/partials/calendar/day/?ym=2026-04"',
+            body,
+        )
+
     def test_calendar_partials_carry_icon_jump_pickers(self):
         day = self.client.get('/partials/calendar/day/', {'ym': '2026-04'}).content.decode()
         self.assertIn('type="date"', day)
