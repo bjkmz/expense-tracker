@@ -2,6 +2,7 @@ import calendar as cal_module
 import json
 from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
+from urllib.parse import urlparse
 
 from django.db.models import DecimalField, Sum
 from django.db.models import Case, When
@@ -70,10 +71,21 @@ def _parse_ym(raw: str | None, today: date) -> tuple[int, int]:
     return today.year, today.month
 
 
+def _cal_active(request) -> tuple[str, str]:
+    """Scope and period of the detail page an HTMX calendar request came from."""
+    path = urlparse(request.headers.get('HX-Current-URL', '')).path
+    parts = [p for p in path.split('/') if p]
+    if len(parts) == 2 and parts[0] in ('day', 'month'):
+        return parts[0], parts[1]
+    return '', ''
+
+
 def calendar_day(request):
     today = timezone.localdate()
     y, m = _parse_ym(request.GET.get('ym'), today)
     ym = f'{y:04d}-{m:02d}'
+    cal_scope, cal_period = _cal_active(request)
+    active = cal_period if cal_scope == 'day' else ''
     # prev/next via month arithmetic
     if m == 1:
         prev_ym = f'{y - 1:04d}-12'
@@ -130,9 +142,11 @@ def calendar_day(request):
         'prev_ym': prev_ym,
         'next_ym': next_ym,
         'cells': cells,
+        'active': active,
     }
     response = render(request, 'partials/calendar_day.html', ctx)
     response['HX-Trigger'] = json.dumps({'cal-period': {'scope': 'day', 'period': f'{ym}-01'}})
+    response['Cache-Control'] = 'no-store'
     return response
 
 
@@ -143,6 +157,13 @@ def calendar_month(request):
         assert 1900 <= y <= 2100
     except (ValueError, AssertionError, TypeError):
         y = today.year
+    cal_scope, cal_period = _cal_active(request)
+    if cal_scope == 'day':
+        active = cal_period[:7]
+    elif cal_scope == 'month':
+        active = cal_period
+    else:
+        active = ''
 
     from tracker.models import Expense
 
@@ -178,9 +199,10 @@ def calendar_month(request):
             }
         )
 
-    ctx = {'y': y, 'prev_y': y - 1, 'next_y': y + 1, 'cells': cells}
+    ctx = {'y': y, 'prev_y': y - 1, 'next_y': y + 1, 'cells': cells, 'active': active}
     response = render(request, 'partials/calendar_month.html', ctx)
     response['HX-Trigger'] = json.dumps({'cal-period': {'scope': 'month', 'period': f'{y}-01'}})
+    response['Cache-Control'] = 'no-store'
     return response
 
 

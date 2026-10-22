@@ -113,6 +113,49 @@ class CalendarHeatmapTests(TestCase):
         self.assertIn('?y=2025', body)
         self.assertIn('?y=2027', body)
 
+    def test_active_day_cell_is_marked(self):
+        r = self.client.get(
+            '/partials/calendar/day/',
+            {'ym': '2026-04'},
+            HTTP_HX_CURRENT_URL='http://testserver/day/2026-04-15/',
+        )
+        body = r.content.decode()
+        self.assertEqual(r.headers['Cache-Control'], 'no-store')
+        self.assertEqual(body.count('aria-current="true"'), 1)
+        cell = body[body.index('href="/day/2026-04-15/"'):]
+        cell = cell[:cell.index('>')]
+        self.assertIn('cal-active', cell)
+
+    def test_active_month_cell_is_marked(self):
+        r = self.client.get(
+            '/partials/calendar/month/',
+            {'y': '2026'},
+            HTTP_HX_CURRENT_URL='http://testserver/month/2026-04/',
+        )
+        body = r.content.decode()
+        self.assertEqual(r.headers['Cache-Control'], 'no-store')
+        self.assertEqual(body.count('aria-current="true"'), 1)
+        cell = body[body.index('href="/month/2026-04/"'):]
+        cell = cell[:cell.index('>')]
+        self.assertIn('cal-active', cell)
+
+    def test_month_tab_marks_month_containing_active_day(self):
+        body = self.client.get(
+            '/partials/calendar/month/',
+            {'y': '2026'},
+            HTTP_HX_CURRENT_URL='http://testserver/day/2026-04-15/',
+        ).content.decode()
+        self.assertEqual(body.count('aria-current="true"'), 1)
+        self.assertIn('href="/month/2026-04/"', body)
+
+    def test_home_calendar_has_no_active_cell(self):
+        body = self.client.get(
+            '/partials/calendar/day/',
+            {'ym': '2026-04'},
+            HTTP_HX_CURRENT_URL='http://testserver/',
+        ).content.decode()
+        self.assertNotIn('aria-current="true"', body)
+
     def test_detail_stubs(self):
         self.assertEqual(self.client.get('/day/2026-04-15/').status_code, 200)
         self.assertEqual(self.client.get('/month/2026-04/').status_code, 200)

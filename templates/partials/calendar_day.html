@@ -23,7 +23,8 @@
           {% if c.flag == 'today' %}bg-green-300 text-neutral-900
           {% elif c.flag == 'hot' %}bg-red-300 text-neutral-900
           {% elif c.flag == 'cold' %}bg-blue-200 text-neutral-900
-          {% else %}bg-neutral-600 text-neutral-100{% endif %}">
+          {% else %}bg-neutral-600 text-neutral-100{% endif %}{% if c.iso == active %} cal-active{% endif %}"
+         {% if c.iso == active %}aria-current="true"{% endif %}>
         <div class="text-right text-sm font-semibold leading-4">{{ c.day }}</div>
         <div class="mt-auto">
           <div class="truncate tabular-nums text-[9px] leading-3 {% if c.flag %}text-green-800{% else %}text-green-400{% endif %}">I {{ c.income_s }}</div>

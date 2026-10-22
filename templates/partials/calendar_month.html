@@ -17,7 +17,8 @@
         {% if c.flag == 'today' %}bg-green-300 text-neutral-900
         {% elif c.flag == 'hot' %}bg-red-300 text-neutral-900
         {% elif c.flag == 'cold' %}bg-blue-200 text-neutral-900
-         {% else %}bg-neutral-600 text-neutral-100{% endif %}">
+         {% else %}bg-neutral-600 text-neutral-100{% endif %}{% if c.ym == active %} cal-active{% endif %}"
+       {% if c.ym == active %}aria-current="true"{% endif %}>
       <span class="flex items-center text-sm">{{ c.name }}</span>
       <span class="flex flex-col justify-center text-right min-w-0">
         <span class="truncate tabular-nums text-[9px] leading-3 {% if c.flag %}text-green-800{% else %}text-green-400{% endif %}">I {{ c.income_s }}</span>
