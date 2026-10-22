@@ -50,7 +50,7 @@ def home(request):
         'default_y': today.year,
         'categories': list(Category.objects.order_by('name')),
     }
-    ctx.update(_insights_ctx('day', today.isoformat()))
+    ctx.update(_insights_ctx('day', today.isoformat(), _chart_kind(request)))
     return render(request, 'home.html', ctx)
 
 
@@ -395,6 +395,11 @@ def record_delete(request, pk):
     return redirect('/')
 
 
+def _chart_kind(request) -> str:
+    kind = request.GET.get('chart') or request.COOKIES.get('ins_chart') or 'line'
+    return kind if kind in ('line', 'pie') else 'line'
+
+
 def _insights_ctx(scope: str, period: str, chart_type: str = 'line', sort: str = 'date_asc') -> dict:
     from tracker.services.charts import get_chart_html
     from tracker.services.insights import insights_for
@@ -421,19 +426,21 @@ def insights_chart(request):
     if scope not in SCOPES:
         scope = 'day'
     period = _safe_period(scope, request.GET.get('period'), timezone.localdate())
-    kind = request.GET.get('type', 'line')
+    kind = request.GET.get('type') or request.COOKIES.get('ins_chart') or 'line'
     from tracker.services.charts import get_chart_html
 
     if kind not in ('line', 'pie'):
         kind = 'line'
     html, _ = get_chart_html(scope, period, kind)
     flipped = 'pie' if kind == 'line' else 'line'
-    return render(request, 'partials/insights_chart.html', {
+    response = render(request, 'partials/insights_chart.html', {
         'ins_scope': scope,
         'ins_period': period,
         'chart_flipped': flipped,
         'chart_html': html,
     })
+    response.set_cookie('ins_chart', kind, samesite='Lax')
+    return response
 
 
 @require_GET
@@ -463,7 +470,7 @@ def home_insights(request):
     if scope not in SCOPES:
         scope = 'day'
     period = _safe_period(scope, request.GET.get('period'), timezone.localdate())
-    chart = request.GET.get('chart', 'line')
+    chart = _chart_kind(request)
     sort = request.GET.get('sort', 'date_asc')
     ctx = _insights_ctx(scope, period, chart, sort)
     return render(request, 'partials/home_insights.html', ctx)
@@ -473,7 +480,7 @@ def day_detail(request, iso):
     today = timezone.localdate()
     day = _parse_iso_day(iso, today)
     ctx = _panel_for('day', day.isoformat(), today)
-    chart_type = request.GET.get('chart', 'line')
+    chart_type = _chart_kind(request)
     sort = request.GET.get('sort', 'date_asc')
     ctx.update(_insights_ctx('day', day.isoformat(), chart_type, sort))
     ctx.update({
@@ -495,7 +502,7 @@ def month_detail(request, ym):
     except (ValueError, AttributeError):
         yy, mm = today.year, today.month
         cal_ym = today.strftime('%Y-%m')
-    chart_type = request.GET.get('chart', 'line')
+    chart_type = _chart_kind(request)
     sort = request.GET.get('sort', 'date_asc')
     ctx.update(_insights_ctx('month', ym, chart_type, sort))
     ctx.update({

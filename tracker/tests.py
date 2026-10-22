@@ -528,6 +528,24 @@ class InsightsPanelTests(TestCase):
         # highest-income day (3rd) before spike day (15th) when sorting by income desc
         self.assertLess(body.index('>3<'), body.index('>15<'))
 
+    def test_chart_toggle_saves_kind_cookie(self):
+        pie = self.client.get('/partials/insights/chart/', {'scope': 'day', 'period': '2026-04-15', 'type': 'pie'})
+        self.assertEqual(pie.cookies['ins_chart'].value, 'pie')
+        line = self.client.get('/partials/insights/chart/', {'scope': 'day', 'period': '2026-04-15', 'type': 'line'})
+        self.assertEqual(line.cookies['ins_chart'].value, 'line')
+
+    def test_detail_pages_use_saved_chart_kind(self):
+        self.client.cookies['ins_chart'] = 'pie'
+        for url in ('/day/2026-04-15/', '/month/2026-04/'):
+            body = self.client.get(url).content.decode()
+            self.assertNotIn('lines+markers', body)
+            self.assertIn('type=line', body)
+
+    def test_chart_query_param_overrides_saved_kind(self):
+        self.client.cookies['ins_chart'] = 'pie'
+        body = self.client.get('/day/2026-04-15/?chart=line').content.decode()
+        self.assertIn('lines+markers', body)
+
 
 @override_settings(
     HEATMAP_STATS_PATH=settings.BASE_DIR / 'tmp' / 'test_heatmap_stats.json',
@@ -656,6 +674,13 @@ class HomeInsightsTests(TestCase):
         self.assertIn("'right-3/4'", body)  # toggle JS re-adds the same class
         self.assertNotIn('w-[25vw]', body)
         self.assertNotIn('right-[75vw]', body)
+
+    def test_home_uses_saved_chart_kind(self):
+        self.client.cookies['ins_chart'] = 'pie'
+        body = self.client.get('/').content.decode()
+        self.assertNotIn('lines+markers', body)
+        yearly = self.client.get('/partials/home/insights/', {'scope': 'yearly', 'period': 'all'})
+        self.assertNotIn('lines+markers', yearly.content.decode())
 
     def test_home_insights_all_data_scopes(self):
         yearly = self.client.get('/partials/home/insights/', {'scope': 'yearly', 'period': 'all'})
