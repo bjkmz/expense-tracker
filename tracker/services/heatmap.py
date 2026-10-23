@@ -115,25 +115,25 @@ def compact_amount(v: Decimal | float | int | None) -> str:
     return s
 
 
-def highlight_day(expense_total: Decimal | float | None, stats: dict, is_today: bool) -> str:
-    if is_today:
+def _highlight(expense_total, mean, median, is_current: bool) -> str:
+    if is_current:
         return 'today'
     e = float(expense_total or 0)
-    mean_d, med_d = stats.get('mean_daily', 0) or 0, stats.get('median_daily', 0) or 0
-    if mean_d > 0 and e > 5 * mean_d:
+    mean, median = mean or 0, median or 0
+    if mean > 0 and e > 5 * mean:
         return 'hot'
-    if e > 0 and med_d > 0 and e < 0.8 * med_d:
+    if e > 0 and median > 0 and e < 0.8 * median:
         return 'cold'
     return ''
+
+
+def highlight_day(expense_total: Decimal | float | None, stats: dict, is_today: bool) -> str:
+    return _highlight(
+        expense_total, stats.get('mean_daily'), stats.get('median_daily'), is_today
+    )
 
 
 def highlight_month(expense_total: Decimal | float | None, stats: dict, is_this_month: bool) -> str:
-    if is_this_month:
-        return 'today'
-    e = float(expense_total or 0)
-    mean_m, med_m = stats.get('mean_monthly', 0) or 0, stats.get('median_monthly', 0) or 0
-    if mean_m > 0 and e > 5 * mean_m:
-        return 'hot'
-    if e > 0 and med_m > 0 and e < 0.8 * med_m:
-        return 'cold'
-    return ''
+    return _highlight(
+        expense_total, stats.get('mean_monthly'), stats.get('median_monthly'), is_this_month
+    )

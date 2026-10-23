@@ -18,13 +18,11 @@ from collections import defaultdict
 from datetime import date
 from decimal import Decimal
 
-from django.db.models import Count, DecimalField, Max, Sum
-from django.db.models import Case, When
+from django.db.models import Count, Sum
 
+from tracker.categories import CATEGORY_ORDER, EXPENSE_CATEGORIES as EXPENSE_CATS
 from tracker.services.dates import month_range
 
-CATEGORY_ORDER = ['Income', 'Food', 'Transpo', 'Consumable', 'Ownership', 'Miscellaneous']
-EXPENSE_CATS = ['Food', 'Transpo', 'Consumable', 'Ownership', 'Miscellaneous']
 SORTS = ('date_asc', 'date_desc', 'expense_desc', 'expense_asc', 'income_desc', 'income_asc')
 SORT_DIMENSIONS = (('date', 'Date'), ('expense', 'Expense'), ('income', 'Income'))
 SORT_DEFAULTS = {'date': 'date_asc', 'expense': 'expense_desc', 'income': 'income_desc'}
@@ -260,6 +258,11 @@ def insights_for(scope: str, period: str, sort: str = 'date_asc') -> dict:
     else:
         ctx['rows_prefix'] = 'Yearly rows across'
     ctx['sort_label'], ctx['sort_options'] = sort_menu(ctx['sort'])
+    ctx['card_date_format'] = (
+        'F Y' if scope == 'month'
+        else 'M d, Y' if scope in ('yearly', 'overall')
+        else 'M d'
+    )
     return ctx
 
 

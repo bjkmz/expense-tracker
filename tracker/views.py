@@ -11,8 +11,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 
+from tracker.models import Category, Expense
+from tracker.services.cache import invalidate_caches
+from tracker.services.charts import get_chart_html
 from tracker.services.dates import month_range
 from tracker.services.heatmap import compact_amount, get_heatmap_stats, highlight_day, highlight_month
+from tracker.services.insights import SORTS, insights_for, list_rows, period_caption, sort_menu
 from tracker.services.records import day_panel_data, month_panel_data
 
 SCOPES = ('day', 'month', 'yearly', 'overall')
@@ -42,8 +46,6 @@ def _safe_period(scope: str, raw: str | None, today: date) -> str:
 
 
 def home(request):
-    from tracker.models import Category
-
     today = timezone.localdate()
     ctx = {
         'today': today,
@@ -54,11 +56,6 @@ def home(request):
     }
     ctx.update(_insights_ctx('day', today.isoformat(), _chart_kind(request)))
     return render(request, 'home.html', ctx)
-
-
-def calendar_day_stub(request):
-    # Kept for backwards compat; P2 uses calendar_day.
-    return calendar_day(request)
 
 
 def _parse_ym(raw: str | None, today: date) -> tuple[int, int]:
@@ -96,8 +93,6 @@ def calendar_day(request):
         next_ym = f'{y + 1:04d}-01'
     else:
         next_ym = f'{y:04d}-{m + 1:02d}'
-
-    from tracker.models import Expense
 
     per_day = (
         Expense.objects.filter(date__range=month_range(y, m))
@@ -166,8 +161,6 @@ def calendar_month(request):
     else:
         active = ''
 
-    from tracker.models import Expense
-
     per_month = (
         Expense.objects.filter(date__year=y)
         .values('date__month')
@@ -218,14 +211,7 @@ def _parse_iso_day(raw: str | None, fallback: date) -> date:
 def _panel_for(scope: str, period: str, today: date, error: str = '') -> dict:
     """Build full panel context (summary + list + nav) for day or month scope."""
     if scope == 'month':
-        y, m = _parse_ym(period if '-' in (period or '') and len(period) == 7 else None, today)
-        # _parse_ym expects YYYY-MM; period here is YYYY-MM
-        try:
-            yy, mm = map(int, period.split('-'))
-            y, m = yy, mm
-            assert 1 <= m <= 12
-        except (ValueError, AttributeError, AssertionError):
-            pass
+        y, m = _parse_ym(period, today)
         data = month_panel_data(y, m)
         cur = date(y, m, 1)
         first, last = month_range(y, m)
@@ -237,7 +223,7 @@ def _panel_for(scope: str, period: str, today: date, error: str = '') -> dict:
             'head_label': cur.strftime('%B %Y'),
             'prev_url': f'/month/{prev_ym}/',
             'next_url': f'/month/{next_ym}/',
-            'add_date_value': period if period != today.strftime('%Y-%m') else today.isoformat(),
+            'add_date_value': data['period'] if data['period'] != today.strftime('%Y-%m') else today.isoformat(),
             'show_date_input': True,
             'add_min': first.isoformat(),
             'add_max': last.isoformat(),
@@ -301,10 +287,6 @@ def _origin_scope_period(request) -> tuple[str, str]:
 
 @require_POST
 def record_create(request):
-    from django.http import HttpResponse
-
-    from tracker.models import Category, Expense
-
     is_home_modal = request.POST.get('origin') == 'home-modal'
     is_hx = bool(request.headers.get('HX-Request'))
     scope, period = _origin_scope_period(request)
@@ -341,8 +323,6 @@ def record_create(request):
 
 @require_POST
 def record_update(request, pk):
-    from tracker.models import Category, Expense
-
     scope, period = _origin_scope_period(request)
     exp = get_object_or_404(Expense, pk=pk)
     try:
@@ -376,8 +356,6 @@ def record_update(request, pk):
 
 @require_POST
 def record_move(request, pk):
-    from tracker.models import Expense
-
     scope, period = _origin_scope_period(request)
     exp = get_object_or_404(Expense, pk=pk)
     try:
@@ -389,8 +367,6 @@ def record_move(request, pk):
         return HttpResponseBadRequest(err)
     exp.date = new_date
     exp.save()
-    from tracker.services.cache import invalidate_caches
-
     invalidate_caches()
     if request.headers.get('HX-Request'):
         return _render_panel(request, scope, period)
@@ -399,13 +375,9 @@ def record_move(request, pk):
 
 @require_POST
 def record_delete(request, pk):
-    from tracker.models import Expense
-
     scope, period = _origin_scope_period(request)
     exp = get_object_or_404(Expense, pk=pk)
     exp.delete()
-    from tracker.services.cache import invalidate_caches
-
     invalidate_caches()
     if request.headers.get('HX-Request'):
         return _render_panel(request, scope, period)
@@ -418,9 +390,6 @@ def _chart_kind(request) -> str:
 
 
 def _insights_ctx(scope: str, period: str, chart_type: str = 'line', sort: str = 'date_asc') -> dict:
-    from tracker.services.charts import get_chart_html
-    from tracker.services.insights import insights_for
-
     if chart_type not in ('line', 'pie'):
         chart_type = 'line'
     ins = insights_for(scope, period, sort)
@@ -444,8 +413,6 @@ def insights_chart(request):
         scope = 'day'
     period = _safe_period(scope, request.GET.get('period'), timezone.localdate())
     kind = request.GET.get('type') or request.COOKIES.get('ins_chart') or 'line'
-    from tracker.services.charts import get_chart_html
-
     if kind not in ('line', 'pie'):
         kind = 'line'
     html, _ = get_chart_html(scope, period, kind)
@@ -462,8 +429,6 @@ def insights_chart(request):
 
 @require_GET
 def insights_list(request):
-    from tracker.services.insights import SORTS, list_rows, period_caption, sort_menu
-
     scope = request.GET.get('scope', 'day')
     if scope not in SCOPES:
         scope = 'day'
@@ -513,20 +478,16 @@ def day_detail(request, iso):
 def month_detail(request, ym):
     today = timezone.localdate()
     ctx = _panel_for('month', ym, today)
-    try:
-        yy, mm = map(int, ym.split('-'))
-        cal_ym = f'{yy:04d}-{mm:02d}'
-    except (ValueError, AttributeError):
-        yy, mm = today.year, today.month
-        cal_ym = today.strftime('%Y-%m')
+    cal_ym = ctx['period']
+    yy, mm = map(int, cal_ym.split('-'))
     chart_type = _chart_kind(request)
     sort = request.GET.get('sort', 'date_asc')
-    ctx.update(_insights_ctx('month', ym, chart_type, sort))
+    ctx.update(_insights_ctx('month', cal_ym, chart_type, sort))
     ctx.update({
         'today': today,
         'default_ym': cal_ym,
         'default_y': yy,
         'page_scope': 'month',
-        'page_period': ym,
+        'page_period': cal_ym,
     })
     return render(request, 'records_page.html', ctx)

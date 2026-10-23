@@ -122,15 +122,6 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-# File-based cache (no Redis needed for single-user dev).
-# Chart/heatmap HTML fragments + meta live under tmp/ (see below).
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': BASE_DIR / 'tmp' / 'cache',
-    }
-}
-
 # Disk cache for Plotly partials + heatmap stats (gitignored).
 # Layout: tmp/charts/<scope>_<period>_<line|pie>.html + .meta.json
 #   meta = {"source_max_updated_at": "...", "built_at": "..."}

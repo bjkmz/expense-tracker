@@ -1,6 +1,6 @@
 from django.db import models
 
-EXPENSE_CATEGORIES = ('Transpo', 'Food', 'Consumable', 'Ownership', 'Miscellaneous')
+from tracker.categories import EXPENSE_CATEGORIES
 
 
 class Category(models.Model):

@@ -7,12 +7,10 @@ from __future__ import annotations
 from datetime import date
 from decimal import Decimal
 
-from django.db.models import DecimalField, Sum
-from django.db.models import Case, When
+from django.db.models import Sum
 
+from tracker.categories import CATEGORY_ORDER
 from tracker.services.dates import month_range
-
-CATEGORY_ORDER = ['Income', 'Food', 'Transpo', 'Consumable', 'Ownership', 'Miscellaneous']
 
 
 def _ordered_categories():
@@ -66,16 +64,3 @@ def month_panel_data(year: int, month: int) -> dict:
         'net': income - expense,
         'categories': list(_ordered_categories()),
     }
-
-
-def income_expense_for_day(day: date):
-    """Lightweight per-day income/expense split (used by calendar, kept here for reuse)."""
-    from tracker.models import Expense
-
-    row = Expense.objects.filter(date=day).aggregate(
-        income=Sum(Case(When(category__name='Income', then='amount'), output_field=DecimalField())),
-        expense=Sum(
-            Case(When(category__name='Income', then=None), default='amount', output_field=DecimalField())
-        ),
-    )
-    return row

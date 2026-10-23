@@ -69,14 +69,15 @@ April-2026 anchors (Rice x12, Jeepney x20, bonus 99999.99, Cabinet spike).
 
 ```
 config/            Django settings, root urls
-tracker/           models, views, urls, admin, tests
+tracker/           models, views, urls, admin, tests, categories.py
   services/        heatmap.py, records.py, insights.py, charts.py, cache.py
   management/commands/seed_demo.py
 templates/         base.html, home.html, records_page.html, partials/*
-  partials/        home_insights.html, insights_panel.html, insights_chart.html,
-                   insights_rows.html, insights_list.html, calendar_*, records_*
+  partials/        home_insights.html, insights_panel.html, insights_card.html,
+                   insights_chart.html, insights_rows.html, insights_list.html,
+                   calendar_*, records_*
 public/ + static/  static files (STATICFILES_DIRS)
-tmp/               gitignored: charts/, cache/, heatmap_stats.json
+tmp/               gitignored: charts/, heatmap_stats.json
 reference/         outline.txt + interface sketches 1.png-7.png
 ```
 

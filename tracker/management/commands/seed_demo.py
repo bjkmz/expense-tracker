@@ -18,9 +18,8 @@ from decimal import Decimal
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
+from tracker.categories import CATEGORY_ORDER
 from tracker.models import Category, Expense
-
-CATEGORIES = ['Income', 'Transpo', 'Food', 'Consumable', 'Ownership', 'Miscellaneous']
 
 
 class Command(BaseCommand):
@@ -31,7 +30,7 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
-        for name in CATEGORIES:
+        for name in CATEGORY_ORDER:
             Category.objects.get_or_create(name=name)
         cats = {c.name: c for c in Category.objects.all()}
 

@@ -14,6 +14,7 @@ from datetime import date
 from django.conf import settings
 from django.db.models import Max
 
+from tracker.categories import CATEGORY_ORDER
 from tracker.services.cache import chart_paths, is_fresh, read_chart, write_chart
 
 PIE_COLORS = {
@@ -88,8 +89,6 @@ def _fig_to_div(fig, static: bool = True) -> str:
 
 def _line_html(ctx: dict) -> str:
     import plotly.graph_objects as go
-
-    from tracker.services.insights import CATEGORY_ORDER
 
     series = ctx.get('series', [])
     kind = ctx.get('kind')
