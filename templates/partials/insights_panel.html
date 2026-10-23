@@ -1,7 +1,7 @@
 {# Insights panel (light). Expects: ins_scope, ins_period, ins, chart_type, chart_flipped, chart_html. #}
 <div id="insights-panel" data-scope="{{ ins_scope }}" data-period="{{ ins_period }}" class="bg-white text-slate-800 flex flex-col">
-  {# Graph + summary fused card: exactly half viewport, sticks 4px below top while rows scroll #}
-  <div class="m-3 border border-slate-200 rounded bg-white {% if panel_layout != 'home' %}sticky top-1 z-10 {% endif %}h-[50vh] flex flex-col overflow-hidden">
+  {# Graph + summary fused card: exactly half viewport, sticky below top bar on home, or top-1 on records #}
+  <div class="border border-slate-200 rounded bg-white {% if panel_layout == 'home' %}sticky top-14 z-10 mx-3 mb-3{% else %}sticky top-1 z-10 m-3{% endif %} h-[50vh] flex flex-col overflow-hidden">
     {# Chart box (button + figure); the toggle endpoint re-renders this same partial #}
     {% include 'partials/insights_chart.html' %}
 

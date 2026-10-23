@@ -1,4 +1,4 @@
-{# Home insights section: mode buttons + non-sticky panel. Re-rendered by calendar events and mode clicks. #}
+{# Home insights section: sticky mode buttons + sticky graph card. #}
 {# Expects: ins_scope, ins_period, ins, chart_type, chart_flipped, chart_html. #}
 <div id="home-insights" data-scope="{{ ins_scope }}">
   {# Event driver is a leaf child: a container would leak hx-vals/hx-get to the buttons below. #}
@@ -8,7 +8,7 @@
        hx-vals='js:{scope: event.detail.scope, period: event.detail.period}'
        hx-target="#home-insights" hx-swap="outerHTML"></div>
   {# All-data abstractions: Yearly = per-year graph, Overall = per-month graph #}
-  <div class="flex gap-2 px-3 pt-3">
+  <div class="sticky top-0 z-20 h-14 bg-white flex items-center gap-2 px-3">
     <button class="border rounded px-3 py-1 text-sm {% if ins_scope == 'yearly' %}bg-brand border-brand text-white{% else %}border-slate-300 text-slate-700 hover:bg-brand-tint hover:border-brand-light{% endif %}"
             title="All data, one point per year"
             hx-get="{% url 'home-insights' %}?scope=yearly&period=all"

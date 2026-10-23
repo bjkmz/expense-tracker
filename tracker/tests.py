@@ -751,7 +751,8 @@ class HomeInsightsTests(TestCase):
         month_label = timezone.localdate().strftime('%B %Y')
         self.assertIn(f'Daily rows in {month_label}', body)  # calendar-driven default
         self.assertIn('Sort: Date ↑', body)
-        self.assertNotIn('sticky top-1', body)  # home panel scrolls, never sticks
+        self.assertIn('sticky top-0 z-20 h-14 bg-white', body)
+        self.assertIn('sticky top-14', body)
 
     def test_records_page_panel_stays_sticky(self):
         body = self.client.get('/day/2026-04-15/').content.decode()
