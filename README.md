@@ -86,8 +86,9 @@ reference/         outline.txt + interface sketches 1.png-7.png
   drives both daily values and derived monthly totals.
 - Chart HTML (`tmp/charts/<scope>_<period>_<line|pie>.html` + `.meta.json`) is
   gated on a scoped `MAX(updated_at)` query — cheap check versus a full rebuild.
-- Every write path calls `invalidate_caches()` (deletes retreat `MAX`, so gating
-  alone would serve stale charts after a delete).
+- `invalidate_caches()` runs on move/delete only. A delete can retreat `MAX`
+  and a move vacates its old date scope; creates and in-place updates advance
+  `MAX`, so gating rebuilds the affected charts without an explicit clear.
 - Tests override cache paths to `tmp/test_*` so the dev cache stays clean.
 
 ## Troubleshooting
@@ -95,7 +96,7 @@ reference/         outline.txt + interface sketches 1.png-7.png
 - `DisallowedHost: testserver` — dev hosts (`127.0.0.1`, `localhost`,
   `testserver`) are already in `ALLOWED_HOSTS`.
 - Blank charts/styles offline — CDN assets (Tailwind/HTMX/plotly.js) need internet.
-- Stale chart after manual DB edits — deletes/updates outside the views skip
+- Stale chart after manual DB edits — deletes/moves outside the views skip
   invalidation; clear with `Remove-Item tmp\charts\*`, `Remove-Item
   tmp\heatmap_stats.json` and reload.
 - Venv activation blocked on Windows — `Set-ExecutionPolicy -Scope

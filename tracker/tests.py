@@ -531,20 +531,58 @@ class InsightsPanelTests(TestCase):
         self.assertFalse(c4)
         self.assertEqual(norm(h1), norm(h4))
 
-    def test_write_invalidates_charts(self):
+    def test_create_and_update_keep_chart_cache(self):
+        from tracker.services.cache import chart_paths
+        from tracker.services.charts import get_chart_html
+
         food = Category.objects.get(name='Food')
-        self.client.get('/day/2026-04-10/')  # builds chart in test cache dir
+        html_path, _ = chart_paths(settings.CHART_CACHE_DIR, 'day', '2026-04-10', 'line')
+        get_chart_html('day', '2026-04-10', 'line')
+        self.assertTrue(html_path.exists())
         r = self.client.post(
             '/records/',
-            {'item': 'Buster2', 'category': str(food.id), 'amount': '7.00',
+            {'item': 'CacheKeep', 'category': str(food.id), 'amount': '7.00',
              'date': '2026-04-10', 'scope': 'day', 'period': '2026-04-10'},
             HTTP_HX_REQUEST='true',
         )
         self.assertEqual(r.status_code, 200)
-        from pathlib import Path
+        self.assertTrue(html_path.exists())
+        e = Expense.objects.get(item='CacheKeep')
+        r = self.client.post(
+            f'/records/{e.id}/',
+            {'item': 'CacheKeep 2', 'category': str(food.id), 'amount': '8.00',
+             'scope': 'day', 'period': '2026-04-10'},
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(html_path.exists())
 
-        leftovers = list((settings.BASE_DIR / 'tmp' / 'test_charts_insights').glob('*.html'))
-        self.assertEqual(leftovers, [])
+    def test_move_and_delete_invalidate_charts(self):
+        from tracker.services.cache import chart_paths
+        from tracker.services.charts import get_chart_html
+
+        food = Category.objects.get(name='Food')
+        e = Expense.objects.create(item='MoveBuster', category=food, amount='9.00', date='2026-04-10')
+        old_path, _ = chart_paths(settings.CHART_CACHE_DIR, 'day', '2026-04-10', 'line')
+        get_chart_html('day', '2026-04-10', 'line')
+        self.assertTrue(old_path.exists())
+        r = self.client.post(
+            f'/records/{e.id}/move/',
+            {'new_date': '2026-04-11', 'scope': 'day', 'period': '2026-04-10'},
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(r.status_code, 200)
+        self.assertFalse(old_path.exists())
+        new_path, _ = chart_paths(settings.CHART_CACHE_DIR, 'day', '2026-04-11', 'line')
+        get_chart_html('day', '2026-04-11', 'line')
+        self.assertTrue(new_path.exists())
+        r = self.client.post(
+            f'/records/{e.id}/delete/',
+            {'scope': 'day', 'period': '2026-04-11'},
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(r.status_code, 200)
+        self.assertFalse(new_path.exists())
 
     def test_day_page_has_insights(self):
         r = self.client.get('/day/2026-04-15/')

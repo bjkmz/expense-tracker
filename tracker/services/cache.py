@@ -58,12 +58,13 @@ def read_chart(html_path: Path) -> str:
 
 
 def invalidate_caches() -> None:
-    """Clear chart + heatmap disk caches after any write.
+    """Clear chart + heatmap disk caches after a move or delete.
 
-    Needed because deletes can retreat MAX(updated_at), making the
-    meta>=db_max freshness check falsely pass. Writes are rare
-    (single user) and rebuilds are gated, so full clear is cheapest
-    correct option. Respects current settings (test overrides safe).
+    A delete can retreat MAX(updated_at) and a move vacates the old date
+    scope, so the meta>=db_max freshness check can falsely pass. Creates and
+    in-place updates advance MAX and rebuild through the normal gate. Writes
+    are rare (single user), so full clear is the cheapest correct option.
+    Respects current settings (test overrides safe).
     """
     from django.conf import settings as dj_settings
 

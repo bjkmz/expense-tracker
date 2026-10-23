@@ -332,9 +332,6 @@ def record_create(request):
         if is_hx:
             return _render_panel(request, scope, period, error=str(e))
         return HttpResponseBadRequest(str(e))
-    from tracker.services.cache import invalidate_caches
-
-    invalidate_caches()
     if is_home_modal and is_hx:
         return HttpResponse('', headers={'HX-Trigger': 'record-created'})
     if is_hx:
@@ -372,10 +369,6 @@ def record_update(request, pk):
         if request.headers.get('HX-Request'):
             return _render_panel(request, scope, period, error=str(e))
         return HttpResponseBadRequest(str(e))
-    if changed:
-        from tracker.services.cache import invalidate_caches
-
-        invalidate_caches()
     if request.headers.get('HX-Request'):
         return _render_panel(request, scope, period)
     return redirect(f'/day/{exp.date.isoformat()}/')
