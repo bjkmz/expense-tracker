@@ -850,3 +850,12 @@ class HomeInsightsTests(TestCase):
         ):
             r = self.client.get(path, params)
             self.assertEqual(r.status_code, 200, path)
+
+    def test_home_mobile_calendar_loads_on_open(self):
+        body = self.client.get('/').content.decode()
+        self.assertIn('function openCalModal()', body)
+        self.assertIn('onclick="openCalModal()"', body)
+        mobile = body[body.index('id="calendar-m"'):]
+        mobile = mobile[:mobile.index('>')]
+        self.assertIn('hx-trigger="refresh"', mobile)
+        self.assertNotIn('load', mobile)

@@ -29,7 +29,7 @@
   {# Mobile bottom bar + calendar modal (3.png). Desktop aside stays hidden on mobile. #}
   <nav class="md:hidden fixed bottom-0 inset-x-0 bg-neutral-900 text-neutral-100 flex justify-between p-3">
     <button class="border rounded-full w-10 h-10" title="Profile">◔</button>
-    <button class="border rounded-full w-10 h-10" title="Calendar" onclick="document.getElementById('cal-modal').showModal()">📅</button>
+    <button class="border rounded-full w-10 h-10" title="Calendar" onclick="openCalModal()">📅</button>
   </nav>
   <dialog id="cal-modal" class="bg-neutral-700 text-neutral-100 rounded p-0 w-[92vw] max-w-md">
     <div class="flex items-center justify-between p-3">
@@ -40,7 +40,7 @@
       <button class="border rounded px-2" onclick="document.getElementById('cal-modal').close()">✕</button>
     </div>
     <div data-cal data-cal-mobile id="calendar-m" class="m-3 border rounded min-h-[240px]"
-         hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-trigger="load, refresh" hx-swap="innerHTML">
+         hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-trigger="refresh" hx-swap="innerHTML">
       <div class="p-4 text-sm text-neutral-500">Loading calendar…</div>
     </div>
   </dialog>

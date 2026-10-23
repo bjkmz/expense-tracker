@@ -38,6 +38,8 @@
       } else {
         side.classList.add('md:flex');
         side.classList.add('hidden');
+        var cal = side.querySelector('[data-cal]');
+        if (cal && window.htmx) htmx.trigger(cal, 'refresh');
       }
       if (btn) {
         var nowOpen = !open;
@@ -67,6 +69,13 @@
       var target = '/month/' + el.value.slice(0, 7) + '/';
       if (window.location.pathname !== target) window.location = target;
       el.value = el.defaultValue;
+    }
+    // Mobile calendar: load only when the dialog opens, not on page load.
+    function openCalModal() {
+      var modal = document.getElementById('cal-modal');
+      var cal = document.getElementById('calendar-m');
+      if (modal) modal.showModal();
+      if (cal && window.htmx) htmx.trigger(cal, 'refresh');
     }
     // Month add-row day picker: the invisible date input sits over a badge;
     // picking swaps the calendar icon for a day-number cell (re-click repicks).
@@ -127,7 +136,9 @@
           setTimeout(function () { toast.classList.add('hidden'); }, 3000);
         }
         if (window.htmx) {
-          document.querySelectorAll('[data-cal]').forEach(function (el) { htmx.trigger(el, 'refresh'); });
+          document.querySelectorAll('[data-cal]').forEach(function (el) {
+            if (el.getClientRects().length) htmx.trigger(el, 'refresh');
+          });
         }
       }
     });
