@@ -8,7 +8,15 @@
        hx-vals='js:{scope: event.detail.scope, period: event.detail.period}'
        hx-target="#home-insights" hx-swap="outerHTML"></div>
   {# All-data abstractions: Yearly = per-year graph, Overall = per-month graph #}
-  <div class="sticky top-0 z-20 h-14 bg-white flex items-center gap-2 px-3">
+  <div class="sticky top-0 z-20 h-14 bg-white flex items-center gap-2 px-3 overflow-x-auto">
+    <button class="border rounded px-3 py-1 text-sm md:hidden {% if ins_scope == 'day' %}bg-brand border-brand text-white{% else %}border-slate-300 text-slate-700 hover:bg-brand-tint hover:border-brand-light{% endif %}"
+            title="Daily insights"
+            hx-get="{% url 'home-insights' %}?scope=day&period={{ ins_period }}"
+            hx-target="#home-insights" hx-swap="outerHTML">Daily</button>
+    <button class="border rounded px-3 py-1 text-sm md:hidden {% if ins_scope == 'month' %}bg-brand border-brand text-white{% else %}border-slate-300 text-slate-700 hover:bg-brand-tint hover:border-brand-light{% endif %}"
+            title="Monthly insights"
+            hx-get="{% url 'home-insights' %}?scope=month&period={{ ins_period }}"
+            hx-target="#home-insights" hx-swap="outerHTML">Monthly</button>
     <button class="border rounded px-3 py-1 text-sm {% if ins_scope == 'yearly' %}bg-brand border-brand text-white{% else %}border-slate-300 text-slate-700 hover:bg-brand-tint hover:border-brand-light{% endif %}"
             title="All data, one point per year"
             hx-get="{% url 'home-insights' %}?scope=yearly&period=all"
