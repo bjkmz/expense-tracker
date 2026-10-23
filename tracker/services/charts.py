@@ -46,8 +46,8 @@ def scope_max_iso(scope: str, period: str) -> str | None:
     return m.isoformat() if m else None
 
 
-def get_chart_html(scope: str, period: str, kind: str = 'line') -> tuple[str, bool]:
-    """Return (html, from_cache). Builds on miss."""
+def get_chart_html(scope: str, period: str, kind: str = 'line', ctx: dict | None = None) -> tuple[str, bool]:
+    """Return (html, from_cache). Builds on miss, reusing ctx when supplied."""
     if kind not in ('line', 'pie'):
         kind = 'line'
     html_path, meta_path = chart_paths(settings.CHART_CACHE_DIR, scope, period, kind)
@@ -57,22 +57,23 @@ def get_chart_html(scope: str, period: str, kind: str = 'line') -> tuple[str, bo
             return read_chart(html_path), True
         except OSError:
             pass
-    html = build_chart_html(scope, period, kind)
+    html = build_chart_html(scope, period, kind, ctx=ctx)
     write_chart(html_path, meta_path, html, db_max)
     return html, False
 
 
-def build_chart_html(scope: str, period: str, kind: str = 'line') -> str:
+def build_chart_html(scope: str, period: str, kind: str = 'line', ctx: dict | None = None) -> str:
     from tracker.services.insights import all_context, month_context, year_context
 
-    if scope == 'day':
-        ctx = month_context(period)
-    elif scope == 'month':
-        ctx = year_context(period)
-    elif scope == 'yearly':
-        ctx = all_context('yearly')
-    else:
-        ctx = all_context('monthly')
+    if ctx is None:
+        if scope == 'day':
+            ctx = month_context(period)
+        elif scope == 'month':
+            ctx = year_context(period)
+        elif scope == 'yearly':
+            ctx = all_context('yearly')
+        else:
+            ctx = all_context('monthly')
     if kind == 'pie':
         return _pie_html(ctx)
     return _line_html(ctx)

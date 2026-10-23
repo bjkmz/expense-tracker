@@ -429,7 +429,7 @@ def _insights_ctx(scope: str, period: str, chart_type: str = 'line', sort: str =
     if chart_type not in ('line', 'pie'):
         chart_type = 'line'
     ins = insights_for(scope, period, sort)
-    chart_html, from_cache = get_chart_html(scope, period, chart_type)
+    chart_html, from_cache = get_chart_html(scope, period, chart_type, ctx=ins)
     flipped = 'pie' if chart_type == 'line' else 'line'
     return {
         'ins_scope': scope,

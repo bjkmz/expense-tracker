@@ -119,7 +119,7 @@ class CalendarHeatmapTests(TestCase):
             ('/partials/calendar/month/', {'y': '2026'}),
         ):
             body = self.client.get(url, params).content.decode()
-            for label in ('Today / this month', 'Spike &gt;5× avg', 'Low &lt;80% median'):
+            for label in ('Current Day / Month', 'Spike: E&gt;5× avg', 'Low: E&lt;80% median'):
                 self.assertIn(label, body)
             for swatch in ('bg-green-300/70', 'bg-red-300/70', 'bg-blue-200/70'):
                 self.assertIn(swatch, body)
