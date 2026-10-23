@@ -67,7 +67,8 @@ class SeedDemoTests(TestCase):
     CHART_CACHE_DIR=settings.BASE_DIR / 'tmp' / 'test_charts_cal',
 )
 class CalendarHeatmapTests(TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         call_command('seed_demo', '--clear')
 
     def test_highlight_helpers(self):
@@ -177,9 +178,10 @@ class CalendarHeatmapTests(TestCase):
     CHART_CACHE_DIR=settings.BASE_DIR / 'tmp' / 'test_charts_records',
 )
 class RecordsPanelTests(TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         call_command('seed_demo', '--clear')
-        self.food = Category.objects.get(name='Food')
+        cls.food = Category.objects.get(name='Food')
 
     def _hx(self, **kw):
         kw.setdefault('HTTP_HX_REQUEST', 'true')
@@ -394,7 +396,8 @@ class RecordsPanelTests(TestCase):
     CHART_CACHE_DIR=settings.BASE_DIR / 'tmp' / 'test_charts_insights',
 )
 class InsightsPanelTests(TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         call_command('seed_demo', '--clear')
 
     def test_month_cards_match_seed_anchors(self):
@@ -644,9 +647,10 @@ class InsightsPanelTests(TestCase):
     CHART_CACHE_DIR=settings.BASE_DIR / 'tmp' / 'test_charts_modal',
 )
 class HomeModalTests(TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         call_command('seed_demo', '--clear')
-        self.food = Category.objects.get(name='Food')
+        cls.food = Category.objects.get(name='Food')
 
     def _hx(self, **kw):
         kw.setdefault('HTTP_HX_REQUEST', 'true')
@@ -733,7 +737,8 @@ class HomeModalTests(TestCase):
     CHART_CACHE_DIR=settings.BASE_DIR / 'tmp' / 'test_charts_home',
 )
 class HomeInsightsTests(TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         call_command('seed_demo', '--clear')
 
     def test_home_renders_insights_section_with_mode_buttons(self):

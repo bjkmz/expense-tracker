@@ -34,7 +34,7 @@ April-2026 anchors (Rice x12, Jeepney x20, bonus 99999.99, Cabinet spike).
 | Task              | Command                            |
 |-------------------|------------------------------------|
 | Run dev server    | `python manage.py runserver`       |
-| Run tests         | `python manage.py test tracker` (52 tests) |
+| Run tests         | `python manage.py test tracker` (67 tests) |
 | Reseed demo data  | `python manage.py seed_demo --clear` |
 | Schema changes    | `python manage.py makemigrations` / `migrate` |
 | Admin UI          | `python manage.py createsuperuser`, then `/admin/` |
