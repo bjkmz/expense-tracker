@@ -1,7 +1,7 @@
 """Plotly chart HTML with check-then-build disk cache.
 
 - Gating query is a single indexed MAX(updated_at) over the chart's own
-  month/year range (~1ms) vs Pandas+Plotly build (~50-200ms).
+  month/year range (~1ms) vs Plotly build (~50-200ms).
 - Cached files: tmp/charts/<scope>_<period>_<line|pie>.html + .meta.json
 - plotly.js loads once via CDN in base.html; fragments use include_plotlyjs=False,
   staticPlot, transparent backgrounds, flat 2D per outline.

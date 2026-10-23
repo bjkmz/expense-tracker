@@ -1,7 +1,7 @@
 """Disk-cache helpers for Plotly partials + heatmap stats (P0).
 
 Policy (agreed):
-- ORM first. Pandas only for mean/median over pre-aggregated series.
+- ORM first. Heatmap mean/median use stdlib statistics over pre-aggregated rows.
 - Never load the whole Expense table. Gate every recompute on
   MAX(updated_at) (single indexed query) vs cached meta.
 - plotly.js loads once via CDN; cached partials store HTML with

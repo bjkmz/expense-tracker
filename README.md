@@ -1,8 +1,8 @@
 # Expense Tracker
 
-Django + HTMX expense tracker (SQLite, Tailwind via CDN, Plotly.py + Pandas for
-insights/heatmap). Single-user, no auth. Interface sketches and architecture notes
-live in `reference/` (`outline.txt`, `1.png–7.png`).
+Django + HTMX expense tracker (SQLite, Tailwind via CDN, Plotly.py for charts).
+Single-user, no auth. Interface sketches and architecture notes live in
+`reference/` (`outline.txt`, `1.png–7.png`).
 
 ## Prereqs
 
@@ -22,8 +22,7 @@ python manage.py runserver
 ```
 
 Open `http://127.0.0.1:8000/`. To reseed demo data: `python manage.py seed_demo --clear`.
-Pinned versions (`requirements.txt`): `Django==5.2.17`, `pandas==2.3.3`,
-`plotly==6.5.2`, `numpy==2.1.3`.
+Pinned versions (`requirements.txt`): `Django==5.2.17`, `plotly==6.5.2`.
 
 Migrations `tracker/0001_initial` + `tracker/0002_seed_categories` create the
 `Category`/`Expense` tables and the six categories (Income, Transpo, Food,
@@ -83,8 +82,8 @@ reference/         outline.txt + interface sketches 1.png-7.png
 
 ## Caching rules (read before changing data code)
 
-- ORM first; Pandas is used only for heatmap mean/median (lazy import inside the
-  recompute path).
+- ORM first; heatmap mean/median use stdlib `statistics`. One daily SUM query
+  drives both daily values and derived monthly totals.
 - Chart HTML (`tmp/charts/<scope>_<period>_<line|pie>.html` + `.meta.json`) is
   gated on a scoped `MAX(updated_at)` query — cheap check versus a full rebuild.
 - Every write path calls `invalidate_caches()` (deletes retreat `MAX`, so gating

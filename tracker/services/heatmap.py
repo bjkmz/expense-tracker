@@ -1,18 +1,19 @@
-"""Heatmap stats: ORM first, Pandas only for mean/median.
+"""Heatmap stats: ORM first, stdlib statistics for mean/median.
 
 - Per-period visible totals (31 days / 12 months) always come from ORM SUMs.
 - Global mean/median (all-time, expense-only, non-zero periods) are cached in
   settings.HEATMAP_STATS_PATH and recomputed only when global MAX(updated_at)
-  moves. Pandas is imported lazily inside recompute only.
+  moves. Recompute uses one daily SUM query; monthly totals are derived from it.
 """
 from __future__ import annotations
 
 import json
+import statistics
+from collections import defaultdict
 from decimal import Decimal
 
 from django.conf import settings
 from django.db.models import Max, Sum
-from django.db.models.functions import TruncMonth
 
 
 def _db_global_max_iso() -> str | None:
@@ -55,30 +56,22 @@ def recompute_heatmap_stats(db_max: str | None = None) -> dict:
         .annotate(t=Sum('amount'))
         .order_by()
     )
-    daily_vals = [float(r['t']) for r in daily_qs if r['t'] and float(r['t']) > 0]
-
-    monthly_qs = (
-        Expense.objects.exclude(category__name='Income')
-        .annotate(m=TruncMonth('date'))
-        .values('m')
-        .annotate(t=Sum('amount'))
-        .order_by()
-    )
-    monthly_vals = [float(r['t']) for r in monthly_qs if r['t'] and float(r['t']) > 0]
+    daily_vals = []
+    monthly_totals = defaultdict(Decimal)
+    for row in daily_qs:
+        amount = row['t'] or Decimal('0.00')
+        if amount > 0:
+            daily_vals.append(float(amount))
+        monthly_totals[(row['date'].year, row['date'].month)] += amount
+    monthly_vals = [float(v) for v in monthly_totals.values() if v > 0]
 
     if daily_vals:
-        import pandas as pd  # lazy: only on recompute
-
-        ds = pd.Series(daily_vals, dtype='float64')
-        mean_daily, median_daily = float(ds.mean()), float(ds.median())
+        mean_daily, median_daily = float(statistics.mean(daily_vals)), float(statistics.median(daily_vals))
     else:
         mean_daily, median_daily = 0.0, 0.0
 
     if monthly_vals:
-        import pandas as pd  # lazy
-
-        ms = pd.Series(monthly_vals, dtype='float64')
-        mean_monthly, median_monthly = float(ms.mean()), float(ms.median())
+        mean_monthly, median_monthly = float(statistics.mean(monthly_vals)), float(statistics.median(monthly_vals))
     else:
         mean_monthly, median_monthly = 0.0, 0.0
 
