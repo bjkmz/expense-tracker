@@ -3,45 +3,45 @@
 {% block content %}
 <div class="min-h-screen flex flex-col md:flex-row">
   {# Desktop / tablet collapsible aside. Hidden on mobile (modal instead). #}
-  <aside id="sidenav" class="hidden md:flex md:sticky md:top-0 md:h-screen md:overflow-y-auto bg-neutral-700 text-neutral-100 md:w-1/4 shrink-0 flex-col">
+  <aside id="sidenav" class="hidden md:flex md:sticky md:top-0 md:h-screen md:overflow-y-auto bg-slate-800 text-slate-100 md:w-1/4 shrink-0 flex-col">
     {% include "partials/calendar_panel.html" with mode="desktop" collapsible=True %}
   </aside>
   {# Unified toggle: flat edge flush on the sidenav quarter edge when open, docked at viewport edge when closed. #}
   <button id="cal-toggle" title="Hide calendar" onclick="toggleHomeCal()"
-          class="max-md:hidden fixed right-3/4 top-7 -translate-y-1/2 z-30 h-8 rounded-l-full bg-[#FF9A8B] border border-r-0 border-[#CC6a5e] text-white shadow-lg flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6l-6 6 6 6"/></svg></button>
+          class="max-md:hidden fixed right-3/4 top-7 -translate-y-1/2 z-30 h-8 rounded-l-full bg-brand border border-r-0 border-brand-deep text-white shadow-lg hover:bg-brand-deep flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6l-6 6 6 6"/></svg></button>
   {# Probe: pre-generates closed-state utilities so the first toggle paints cleanly. #}
   <span class="hidden left-0 rounded-r-full border-l-0" aria-hidden="true"></span>
 
   <main class="flex-1 flex flex-col min-h-screen">
-    <header class="banner-bg border-b min-h-[25vh] flex items-center justify-center">
+    <header class="banner-bg border-b border-slate-200 min-h-[25vh] flex items-center justify-center">
       <h1 class="banner text-4xl md:text-6xl font-black text-center">Ǝ%PENSE TRACKER</h1>
     </header>
     <div class="flex justify-center items-center min-h-[25vh] bg-white">
-      <button class="rounded-2xl px-6 py-3 text-white" style="background: var(--teal)"
-              onclick="document.getElementById('add-modal').showModal()">⊕ ADD RECORD</button>
+      <button class="rounded-2xl px-6 py-3 bg-salmon text-slate-950 font-semibold hover:bg-salmon-deep hover:text-white focus:outline-none focus:ring-2 focus:ring-brand"
+              onclick="document.getElementById('add-modal').showModal()">+ ADD RECORD</button>
     </div>
-    <div id="home-toast" class="hidden mx-auto my-2 max-w-md px-4 py-2 rounded bg-green-100 text-green-800 text-sm text-center"></div>
-    <section class="bg-white border-t pb-4">
+    <div id="home-toast" class="hidden mx-auto my-2 max-w-md px-4 py-2 rounded bg-success-tint text-green-800 border border-green-200 text-sm text-center"></div>
+    <section class="bg-white border-t border-slate-200 pb-4">
       {% include "partials/home_insights.html" %}
     </section>
   </main>
 
   {# Mobile bottom bar + calendar modal (3.png). Desktop aside stays hidden on mobile. #}
-  <nav class="md:hidden fixed bottom-0 inset-x-0 bg-neutral-900 text-neutral-100 flex justify-between p-3">
-    <button class="border rounded-full w-10 h-10" title="Profile">◔</button>
-    <button class="border rounded-full w-10 h-10" title="Calendar" onclick="openCalModal()">📅</button>
+  <nav class="md:hidden fixed bottom-0 inset-x-0 bg-slate-900 text-slate-100 flex justify-between p-3">
+    <button class="border border-slate-700 rounded-full w-10 h-10" title="Profile">◔</button>
+    <button class="border border-slate-700 rounded-full w-10 h-10" title="Calendar" onclick="openCalModal()">📅</button>
   </nav>
-  <dialog id="cal-modal" class="bg-neutral-700 text-neutral-100 rounded p-0 w-[92vw] max-w-md">
+  <dialog id="cal-modal" class="bg-slate-800 text-slate-100 rounded p-0 w-[92vw] max-w-md">
     <div class="flex items-center justify-between p-3">
       <div class="flex gap-2 flex-1 mr-2">
-        <button data-cal-tab class="flex-1 border rounded py-1 cal-tab-active" onclick="setCalTab(this)" hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-target="[data-cal-mobile]" hx-swap="innerHTML">DAY</button>
-        <button data-cal-tab class="flex-1 border rounded py-1" onclick="setCalTab(this)" hx-get="{% url 'calendar-month' %}?y={{ default_y }}" hx-target="[data-cal-mobile]" hx-swap="innerHTML">MONTH</button>
+        <button data-cal-tab class="flex-1 border border-slate-600 rounded py-1 cal-tab-active" onclick="setCalTab(this)" hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-target="[data-cal-mobile]" hx-swap="innerHTML">DAY</button>
+        <button data-cal-tab class="flex-1 border border-slate-600 rounded py-1" onclick="setCalTab(this)" hx-get="{% url 'calendar-month' %}?y={{ default_y }}" hx-target="[data-cal-mobile]" hx-swap="innerHTML">MONTH</button>
       </div>
-      <button class="border rounded px-2" onclick="document.getElementById('cal-modal').close()">✕</button>
+      <button class="border border-slate-600 rounded px-2 hover:text-brand-light" onclick="document.getElementById('cal-modal').close()">✕</button>
     </div>
-    <div data-cal data-cal-mobile id="calendar-m" class="m-3 border rounded min-h-[240px]"
+    <div data-cal data-cal-mobile id="calendar-m" class="m-3 border border-slate-700 rounded min-h-[240px]"
          hx-get="{% url 'calendar-day' %}?ym={{ default_ym }}" hx-trigger="refresh" hx-swap="innerHTML">
-      <div class="p-4 text-sm text-neutral-500">Loading calendar…</div>
+      <div class="p-4 text-sm text-slate-400">Loading calendar…</div>
     </div>
   </dialog>
   {% include "partials/add_modal.html" %}

@@ -1,7 +1,7 @@
 {# Records panel (dark). Root id swapped by HTMX on every mutation. #}
-<div id="records-panel" data-scope="{{ scope }}" data-period="{{ period }}" class="bg-slate-900 text-neutral-100 flex flex-col flex-1 min-h-[60vh] lg:min-h-0 lg:overflow-hidden">
+<div id="records-panel" data-scope="{{ scope }}" data-period="{{ period }}" class="bg-slate-900 text-slate-100 flex flex-col flex-1 min-h-[60vh] lg:min-h-0 lg:overflow-hidden">
   {% if error %}
-    <div class="m-3 px-3 py-2 rounded bg-red-900 text-red-100 text-sm">{{ error }}</div>
+    <div class="m-3 px-3 py-2 rounded bg-red-900/40 text-red-100 border border-red-800 text-sm">{{ error }}</div>
   {% endif %}
 
   {# Date head: label with chevrons either side (jump lives in the calendar) #}
@@ -14,7 +14,7 @@
   {# Summary: net + per-category totals, 0.00 if none #}
   <div class="px-4 py-3 border-b border-slate-800 text-sm">
     <div class="font-bold">SUMMARY: <span class="font-normal">{{ net|floatformat:2 }}</span></div>
-    <div class="grid grid-cols-2 gap-x-4 mt-1 text-neutral-300">
+    <div class="grid grid-cols-2 gap-x-4 mt-1 text-slate-300">
       {% for name, total in totals.items %}
         <div>{{ name }}: {{ total|floatformat:2 }}</div>
       {% endfor %}
@@ -41,14 +41,14 @@
       <input type="hidden" name="date" value="{{ add_date_value }}" />
     {% endif %}
     <input name="item" placeholder="Item name" required maxlength="128"
-           class="min-w-0 w-full bg-transparent border-b border-slate-600 px-1 text-sm focus:outline-none" />
+           class="min-w-0 w-full bg-transparent border-b border-slate-600 px-1 text-sm placeholder:text-slate-500 focus:outline-none focus:border-brand-light" />
     <select name="category" required class="min-w-0 bg-slate-800 border border-slate-700 rounded text-sm">
       <option value="">Category</option>
       {% for c in categories %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
     </select>
     <input name="amount" type="number" min="0.01" step="0.01" placeholder="Cost" required
-           class="min-w-0 w-full bg-transparent border-b border-slate-600 px-1 text-sm focus:outline-none" />
-    <button type="submit" title="Add" class="text-slate-400 text-xl leading-none">⊕</button>
+           class="min-w-0 w-full bg-transparent border-b border-slate-600 px-1 text-sm placeholder:text-slate-500 focus:outline-none focus:border-brand-light" />
+    <button type="submit" title="Add" class="text-brand-light hover:text-white text-xl leading-none">+</button>
   </form>
 
   {# Records list: inline-editable, ⋮ menu = delete / change date #}
@@ -61,20 +61,20 @@
           <input type="hidden" name="scope" value="{{ scope }}" />
           <input type="hidden" name="period" value="{{ period }}" />
           <div class="flex items-center gap-1 min-w-0">
-            {% if scope == 'month' %}<span class="record-day w-5 h-5 shrink-0 flex items-center justify-center text-xs text-neutral-500">{{ r.date.day }}</span>{% endif %}
+            {% if scope == 'month' %}<span class="record-day w-5 h-5 shrink-0 flex items-center justify-center text-xs text-slate-400">{{ r.date.day }}</span>{% endif %}
             <input name="item" value="{{ r.item }}" maxlength="128"
-                   class="min-w-0 w-full bg-transparent px-1 text-xs border-b border-transparent hover:border-slate-600 focus:border-neutral-400 focus:outline-none" />
+                   class="min-w-0 w-full bg-transparent px-1 text-xs border-b border-transparent hover:border-slate-600 focus:border-brand-light focus:outline-none" />
           </div>
           <select name="category" class="min-w-0 bg-transparent text-xs border-b border-transparent hover:border-slate-600 focus:outline-none">
             {% for c in categories %}
-              <option value="{{ c.id }}" class="bg-slate-800 text-neutral-100" {% if c.id == r.category_id %}selected{% endif %}>{{ c.name }}</option>
+              <option value="{{ c.id }}" class="bg-slate-800 text-slate-100" {% if c.id == r.category_id %}selected{% endif %}>{{ c.name }}</option>
             {% endfor %}
           </select>
           <input name="amount" type="number" min="0.01" step="0.01" value="{{ r.amount|floatformat:2 }}"
-                 class="min-w-0 w-full bg-transparent px-1 text-xs border-b border-transparent hover:border-slate-600 focus:border-neutral-400 focus:outline-none" />
+                 class="min-w-0 w-full bg-transparent px-1 text-xs border-b border-transparent hover:border-slate-600 focus:border-brand-light focus:outline-none" />
         </form>
         <details class="relative text-right">
-          <summary class="cursor-pointer list-none text-neutral-400 px-1" title="Options">⋮</summary>
+          <summary class="cursor-pointer list-none text-slate-400 hover:text-brand-light px-1" title="Options">⋮</summary>
           <div class="absolute right-0 z-10 mt-1 w-max min-w-20 rounded bg-slate-800 border border-slate-700 p-2 text-left shadow-xl">
             <details class="relative mb-2">
               <summary class="cursor-pointer list-none text-xs px-1 py-1" title="Move to date">Move</summary>
@@ -99,7 +99,7 @@
         </details>
       </div>
     {% empty %}
-      <div class="px-4 py-6 text-center text-neutral-500 text-sm">No records yet — add one above.</div>
+      <div class="px-4 py-6 text-center text-slate-400 text-sm">No records yet — add one above.</div>
     {% endfor %}
   </div>
 

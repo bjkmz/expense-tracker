@@ -1,33 +1,37 @@
 {# Home Add Record modal (P5). Date fixed to today per outline; edit later via records ⋮ menu. #}
-<style>#add-modal::backdrop{background:rgba(0,0,0,0.65);}</style>
-<dialog id="add-modal" class="rounded-2xl p-0 w-[92vw] max-w-sm text-neutral-900 bg-neutral-100">
+<style>
+  #add-modal::backdrop{background:rgba(15,23,42,0.7);}
+  #add-error:empty{display:none;}
+  #add-error:not(:empty){background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5;}
+</style>
+<dialog id="add-modal" class="rounded-2xl p-0 w-[92vw] max-w-sm text-slate-900 bg-slate-50">
   <form id="add-form" method="post" action="{% url 'record-create' %}"
         hx-post="{% url 'record-create' %}" hx-target="#add-error" hx-swap="innerHTML">
     {% csrf_token %}
     <div class="p-5">
       <h3 class="text-lg font-bold mb-1">Add Record</h3>
-      <p class="text-xs text-neutral-500 mb-3">Recorded as today ({{ today_iso }}).</p>
+      <p class="text-xs text-slate-500 mb-3">Recorded as today ({{ today_iso }}).</p>
       <div id="add-error" class="mb-2 px-3 py-2 rounded text-sm"></div>
       <input type="hidden" name="date" value="{{ today_iso }}" />
       <input type="hidden" name="origin" value="home-modal" />
       <label class="block text-sm mb-2">Item
         <input name="item" required maxlength="128" placeholder="Item name" autocomplete="off"
-               class="mt-1 w-full border rounded px-2 py-1 bg-white" />
+               class="mt-1 w-full border border-slate-300 rounded px-2 py-1 bg-white focus:border-brand focus:outline-none" />
       </label>
       <label class="block text-sm mb-2">Category
-        <select name="category" required class="mt-1 w-full border rounded px-2 py-1 bg-white">
+        <select name="category" required class="mt-1 w-full border border-slate-300 rounded px-2 py-1 bg-white focus:border-brand focus:outline-none">
           <option value="">Pick a category</option>
           {% for c in categories %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
         </select>
       </label>
       <label class="block text-sm mb-4">Amount
         <input name="amount" type="number" min="0.01" step="0.01" required placeholder="0.00"
-               class="mt-1 w-full border rounded px-2 py-1 bg-white" />
+               class="mt-1 w-full border border-slate-300 rounded px-2 py-1 bg-white focus:border-brand focus:outline-none" />
       </label>
       <div class="flex justify-end gap-2">
-        <button type="button" class="border rounded px-4 py-2 text-sm"
+        <button type="button" class="border border-slate-300 rounded px-4 py-2 text-sm hover:bg-slate-100"
                 onclick="document.getElementById('add-modal').close()">Cancel</button>
-        <button type="submit" id="add-save" class="rounded px-4 py-2 text-sm text-white" style="background: var(--teal)">Save</button>
+        <button type="submit" id="add-save" class="rounded px-4 py-2 text-sm bg-salmon text-slate-950 font-semibold hover:bg-salmon-deep hover:text-white">Save</button>
       </div>
     </div>
   </form>

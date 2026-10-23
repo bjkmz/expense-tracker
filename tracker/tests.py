@@ -96,8 +96,8 @@ class CalendarHeatmapTests(TestCase):
         self.assertEqual(r.status_code, 200)
         body = r.content.decode()
         self.assertIn('/day/2026-04-15/', body)  # spike day link
-        self.assertIn('bg-red-300', body)  # Apr 15 hot
-        self.assertIn('bg-blue-200', body)  # Apr 23/24/27/28 cold
+        self.assertIn('bg-salmon/40', body)
+        self.assertIn('bg-brand-light/20', body)
         self.assertIn('?ym=2026-03', body)
         self.assertIn('?ym=2026-05', body)
 
@@ -110,7 +110,7 @@ class CalendarHeatmapTests(TestCase):
         self.assertEqual(r.status_code, 200)
         body = r.content.decode()
         self.assertIn('/month/2026-04/', body)
-        self.assertIn('bg-red-300', body)  # April hot month
+        self.assertIn('bg-salmon/40', body)
         self.assertIn('?y=2025', body)
         self.assertIn('?y=2027', body)
 
@@ -122,7 +122,7 @@ class CalendarHeatmapTests(TestCase):
             body = self.client.get(url, params).content.decode()
             for label in ('Current Day / Month', 'Spike: E&gt;5× avg', 'Low: E&lt;80% median'):
                 self.assertIn(label, body)
-            for swatch in ('bg-green-300/70', 'bg-red-300/70', 'bg-blue-200/70'):
+            for swatch in ('bg-brand-light/40', 'bg-salmon/60', 'bg-brand-light/25'):
                 self.assertIn(swatch, body)
 
     def test_active_day_cell_is_marked(self):
@@ -211,7 +211,7 @@ class RecordsPanelTests(TestCase):
     def test_month_page_side_calendar_opens_month_tab(self):
         body = self.client.get('/month/2026-04/').content.decode()
         self.assertIn(
-            'class="flex-1 border rounded py-1 text-sm cal-tab-active" '
+            'class="flex-1 border border-slate-600 rounded py-1 text-sm cal-tab-active" '
             'onclick="setCalTab(this)" hx-get="/partials/calendar/month/?y=2026"',
             body,
         )
@@ -219,7 +219,7 @@ class RecordsPanelTests(TestCase):
     def test_day_page_side_calendar_opens_day_tab(self):
         body = self.client.get('/day/2026-04-15/').content.decode()
         self.assertIn(
-            'class="flex-1 border rounded py-1 text-sm cal-tab-active" '
+            'class="flex-1 border border-slate-600 rounded py-1 text-sm cal-tab-active" '
             'onclick="setCalTab(this)" hx-get="/partials/calendar/day/?ym=2026-04"',
             body,
         )
@@ -270,7 +270,7 @@ class RecordsPanelTests(TestCase):
             body = self.client.get(url).content.decode()
             pos = [body.index(f'>{n}<') for n in want]
             self.assertEqual(pos, sorted(pos))
-            self.assertRegex(body, r'<option[^>]*class="bg-slate-800 text-neutral-100"')
+            self.assertRegex(body, r'<option[^>]*class="bg-slate-800 text-slate-100"')
 
     def test_move_form_collapsed_behind_disclosure(self):
         # Row menu shows Move summary only; date picker + confirm spawn inside

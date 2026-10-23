@@ -18,13 +18,13 @@ from tracker.categories import CATEGORY_ORDER
 from tracker.services.cache import chart_paths, is_fresh, read_chart, write_chart
 
 PIE_COLORS = {
-    'Food': '#FCA5A5',
-    'Transpo': '#93C5FD',
-    'Consumable': '#86EFAC',
-    'Ownership': '#C4B5FD',
-    'Miscellaneous': '#FCD34D',
+    'Food': '#FF9A8B',
+    'Transpo': '#5ED6DC',
+    'Consumable': '#0E7490',
+    'Ownership': '#94A3B8',
+    'Miscellaneous': '#334155',
 }
-LINE_COLOR = '#60A5FA'
+LINE_COLOR = '#0E7490'
 
 
 def _range_for(scope: str, period: str) -> tuple[date | None, date | None]:
@@ -105,7 +105,7 @@ def _line_html(ctx: dict) -> str:
         title = f"Daily Expenses — {ctx['label']}"
     y = [p['y'] for p in series]
     if not any(y):
-        return '<div class="p-6 text-center text-sm text-neutral-500">No expense data yet.</div>'
+        return '<div class="p-6 text-center text-sm text-slate-500">No expense data yet.</div>'
     custom = [[p.get('cats', {}).get(c, 0.0) for c in CATEGORY_ORDER] for p in series]
     cat_lines = '<br>'.join(f'{c}: %{{customdata[{i}]:.2f}}' for i, c in enumerate(CATEGORY_ORDER))
     hover = f'<b>%{{x}}</b><br>{cat_lines}<br>Total expense: %{{y:.2f}}<extra></extra>'
@@ -114,10 +114,11 @@ def _line_html(ctx: dict) -> str:
                                marker=dict(color=LINE_COLOR, size=6),
                                customdata=custom, hovertemplate=hover))
     fig.update_layout(
-        title=dict(text=title, font=dict(size=13)),
+        title=dict(text=title, font=dict(size=13, color='#334155')),
+        font=dict(color='#334155'),
         margin=dict(l=40, r=10, t=40, b=30),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='#E5E7EB'),
+        xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='#E2E8F0'),
         showlegend=False,
     )
     return _fig_to_div(fig, static=False)
@@ -128,10 +129,10 @@ def _pie_html(ctx: dict) -> str:
 
     pie = ctx.get('pie', [])
     if not pie:
-        return '<div class="p-6 text-center text-sm text-neutral-500">No expense data yet.</div>'
+        return '<div class="p-6 text-center text-sm text-slate-500">No expense data yet.</div>'
     labels = [p['label'] for p in pie]
     values = [p['value'] for p in pie]
-    colors = [PIE_COLORS.get(lb, '#D1D5DB') for lb in labels]
+    colors = [PIE_COLORS.get(lb, '#CBD5E1') for lb in labels]
     kind = ctx.get('kind')
     if kind == 'year':
         title = f"Year Categories Division — {ctx['label']}"
@@ -142,7 +143,8 @@ def _pie_html(ctx: dict) -> str:
     fig = go.Figure(go.Pie(labels=labels, values=values, hole=0, marker=dict(colors=colors),
                            textinfo='label+percent', sort=False))
     fig.update_layout(
-        title=dict(text=title, font=dict(size=13)),
+        title=dict(text=title, font=dict(size=13, color='#334155')),
+        font=dict(color='#334155'),
         margin=dict(l=10, r=10, t=40, b=10),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         showlegend=False,

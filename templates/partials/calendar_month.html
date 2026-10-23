@@ -1,28 +1,28 @@
 {# Month heatmap grid: 2-col like 2.png. Each cell: MON + income + expense. #}
-<div class="flex items-center justify-between px-2 py-2 border-b border-neutral-800">
-  <button class="px-2 text-neutral-400" hx-get="{% url 'calendar-month' %}?y={{ prev_y }}" hx-target="closest [data-cal]" hx-swap="innerHTML">‹</button>
+<div class="flex items-center justify-between px-2 py-2 border-b border-slate-700">
+  <button class="px-2 text-slate-400 hover:text-brand-light" hx-get="{% url 'calendar-month' %}?y={{ prev_y }}" hx-target="closest [data-cal]" hx-swap="innerHTML">‹</button>
   <span class="flex items-center gap-1.5 font-semibold">
-    <label class="relative inline-flex cursor-pointer text-neutral-400 hover:text-neutral-200" title="Jump to month">
+    <label class="relative inline-flex cursor-pointer text-slate-400 hover:text-brand-light" title="Jump to month">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       <input type="month" value="{{ y }}-01" aria-label="Jump to month" class="absolute inset-0 opacity-0 cursor-pointer" onchange="jumpCalMonth(this)" />
     </label>
     {{ y }}
   </span>
-  <button class="px-2 text-neutral-400" hx-get="{% url 'calendar-month' %}?y={{ next_y }}" hx-target="closest [data-cal]" hx-swap="innerHTML">›</button>
+  <button class="px-2 text-slate-400 hover:text-brand-light" hx-get="{% url 'calendar-month' %}?y={{ next_y }}" hx-target="closest [data-cal]" hx-swap="innerHTML">›</button>
 </div>
-<div class="grid grid-cols-2 gap-px bg-black/60">
+<div class="grid grid-cols-2 gap-px bg-slate-950/60">
   {% for c in cells %}
     <a href="{% url 'month-detail' c.ym %}" title="I {{ c.income|default:'–' }} / E {{ c.expense|default:'–' }}"
        class="flex items-stretch justify-between gap-2 px-2 py-2 min-w-0 overflow-hidden
-        {% if c.flag == 'today' %}bg-green-300/40 text-neutral-100
-        {% elif c.flag == 'hot' %}bg-red-300/40 text-neutral-100
-        {% elif c.flag == 'cold' %}bg-blue-200/40 text-neutral-100
-         {% else %}bg-neutral-600 text-neutral-100{% endif %}{% if c.ym == active %} cal-active{% endif %}"
+        {% if c.flag == 'today' %}bg-brand-light/30 text-slate-50 ring-1 ring-inset ring-brand-light
+        {% elif c.flag == 'hot' %}bg-salmon/40 text-slate-50
+        {% elif c.flag == 'cold' %}bg-brand-light/20 text-slate-100
+         {% else %}bg-slate-700 text-slate-100{% endif %}{% if c.ym == active %} cal-active{% endif %}"
        {% if c.ym == active %}aria-current="true"{% endif %}>
       <span class="flex items-center text-sm">{{ c.name }}</span>
       <span class="flex flex-col justify-center text-right min-w-0">
-        <span class="truncate tabular-nums text-[9px] leading-3 text-green-300">I {{ c.income_s }}</span>
-        <span class="truncate tabular-nums text-[9px] leading-3 text-red-300">E {{ c.expense_s }}</span>
+        <span class="truncate tabular-nums text-[9px] leading-3 text-brand-light">I {{ c.income_s }}</span>
+        <span class="truncate tabular-nums text-[9px] leading-3 text-salmon">E {{ c.expense_s }}</span>
       </span>
     </a>
   {% endfor %}

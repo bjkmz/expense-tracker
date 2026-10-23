@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Records — {{ head_label }} — Expense Tracker{% endblock %}
 {% block content %}
-<div class="min-h-screen lg:h-screen flex flex-col lg:flex-row overflow-x-clip lg:overflow-hidden bg-neutral-950">
+<div class="min-h-screen lg:h-screen flex flex-col lg:flex-row overflow-x-clip lg:overflow-hidden bg-slate-950">
   {# Left: calendar aside (reuse Day/Month tabs) #}
-  <aside class="bg-neutral-700 text-neutral-100 w-full lg:w-1/4 lg:h-screen lg:flex-none lg:shrink-0 lg:overflow-y-auto flex-col hidden md:flex">
+  <aside class="bg-slate-800 text-slate-100 w-full lg:w-1/4 lg:h-screen lg:flex-none lg:shrink-0 lg:overflow-y-auto flex-col hidden md:flex">
     {% include "partials/calendar_panel.html" with mode="side" collapsible=False cal_tab=page_scope %}
   </aside>
 

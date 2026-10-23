@@ -5,6 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}Expense Tracker{% endblock %}</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { DEFAULT: '#0E7490', light: '#5ED6DC', deep: '#155E75', tint: '#ECFEFF' },
+            salmon: { DEFAULT: '#FF9A8B', deep: '#C2413B' },
+            success: { tint: '#DCFCE7' },
+          },
+        },
+      },
+    };
+  </script>
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
   {# plotly.js loaded ONCE here. HTMX partials must use include_plotlyjs=False. #}
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
@@ -144,16 +157,17 @@
     });
   </script>
   <style>
-    :root { --banner: #FF9A8B; --teal: #5ED6DC; }
-    .banner { color: var(--banner); letter-spacing: .02em; text-shadow: 0 2px 12px rgba(255,255,255,0.9), 0 0 2px #fff; }
-    .banner-dim { text-shadow: 0 2px 12px rgba(0,0,0,0.55), 0 0 2px #4b5563; }
+    :root { --brand-light: #5ED6DC; --brand-deep: #155E75; }
+    .banner { color: var(--brand-deep); letter-spacing: .02em; text-shadow: 0 2px 12px rgba(255,255,255,0.9), 0 0 2px #fff; }
+    .banner-dim { color: var(--brand-light); text-shadow: 0 2px 12px rgba(0,0,0,0.55), 0 0 2px #334155; }
     .banner-bg { background-image: url('/static/banner-bg.jpg'); background-size: cover; background-position: center; }
-    .cal-tab-active { border-color: #d4d4d4; color: #e5e5e5; background: rgba(255,255,255,0.08); }
+    /* .banner-bg { background-image: linear-gradient(135deg, #ECFEFF 0%, #CFFAFE 55%, #A5F3FC 100%); } */
+    .cal-tab-active { border-color: #5ED6DC; color: #A5F3FC; background: rgba(94,214,220,0.16); }
     .cal-active { box-shadow: inset 0 0 0 2px #5ED6DC; }
   </style>
   {% block head %}{% endblock %}
 </head>
-<body class="bg-neutral-100 text-neutral-900" hx-boost="false">
+<body class="bg-slate-100 text-slate-900" hx-boost="false">
   {% block content %}{% endblock %}
 </body>
 </html>
