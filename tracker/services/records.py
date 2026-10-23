@@ -10,6 +10,8 @@ from decimal import Decimal
 from django.db.models import DecimalField, Sum
 from django.db.models import Case, When
 
+from tracker.services.dates import month_range
+
 CATEGORY_ORDER = ['Income', 'Food', 'Transpo', 'Consumable', 'Ownership', 'Miscellaneous']
 
 
@@ -50,7 +52,7 @@ def day_panel_data(day: date) -> dict:
 def month_panel_data(year: int, month: int) -> dict:
     from tracker.models import Expense
 
-    qs = Expense.objects.filter(date__year=year, date__month=month).select_related('category')
+    qs = Expense.objects.filter(date__range=month_range(year, month)).select_related('category')
     totals = _cat_totals(qs)
     income = totals['Income']
     expense = sum((v for k, v in totals.items() if k != 'Income'), Decimal('0.00'))

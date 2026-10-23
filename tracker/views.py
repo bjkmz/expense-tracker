@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 
+from tracker.services.dates import month_range
 from tracker.services.heatmap import compact_amount, get_heatmap_stats, highlight_day, highlight_month
 from tracker.services.records import day_panel_data, month_panel_data
 
@@ -99,7 +100,7 @@ def calendar_day(request):
     from tracker.models import Expense
 
     per_day = (
-        Expense.objects.filter(date__year=y, date__month=m)
+        Expense.objects.filter(date__range=month_range(y, m))
         .values('date')
         .annotate(
             income=Sum(Case(When(category__name='Income', then='amount'), output_field=DecimalField())),
@@ -227,6 +228,7 @@ def _panel_for(scope: str, period: str, today: date, error: str = '') -> dict:
             pass
         data = month_panel_data(y, m)
         cur = date(y, m, 1)
+        first, last = month_range(y, m)
         prev_ym = f'{(cur - timedelta(days=1)).strftime("%Y-%m")}'
         # next month: add 32 days then truncate
         nxt = (cur + timedelta(days=32)).replace(day=1)
@@ -237,8 +239,8 @@ def _panel_for(scope: str, period: str, today: date, error: str = '') -> dict:
             'next_url': f'/month/{next_ym}/',
             'add_date_value': period if period != today.strftime('%Y-%m') else today.isoformat(),
             'show_date_input': True,
-            'add_min': f'{y:04d}-{m:02d}-01',
-            'add_max': f'{y:04d}-{m:02d}-{cal_module.monthrange(y, m)[1]:02d}',
+            'add_min': first.isoformat(),
+            'add_max': last.isoformat(),
             'add_day': today.day if (y, m) == (today.year, today.month) else None,
             'error': error,
         })

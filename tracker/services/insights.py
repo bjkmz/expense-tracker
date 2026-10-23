@@ -14,13 +14,14 @@ Conventions (per outline + user decisions):
 """
 from __future__ import annotations
 
-import calendar as cal_module
 from collections import defaultdict
 from datetime import date
 from decimal import Decimal
 
 from django.db.models import Count, DecimalField, Max, Sum
 from django.db.models import Case, When
+
+from tracker.services.dates import month_range
 
 CATEGORY_ORDER = ['Income', 'Food', 'Transpo', 'Consumable', 'Ownership', 'Miscellaneous']
 EXPENSE_CATS = ['Food', 'Transpo', 'Consumable', 'Ownership', 'Miscellaneous']
@@ -77,7 +78,8 @@ def month_context(day_iso: str) -> dict:
     from tracker.models import Expense
 
     y, m, _ = map(int, day_iso.split('-'))
-    qs = Expense.objects.filter(date__year=y, date__month=m)
+    first, last = month_range(y, m)
+    qs = Expense.objects.filter(date__range=(first, last))
     exp_qs = qs.exclude(category__name='Income')
 
     # daily expense series (line)
@@ -89,7 +91,7 @@ def month_context(day_iso: str) -> dict:
     day_cats: dict[int, dict[str, float]] = {}
     for r in per_day_cat:
         day_cats.setdefault(r['date'].day, {})[r['category__name']] = float(r['t'])
-    ndays = cal_module.monthrange(y, m)[1]
+    ndays = last.day
     series = [{'x': d, 'y': round(by_day.get(d, 0.0), 2),
                'cats': {c: round(day_cats.get(d, {}).get(c, 0.0), 2) for c in CATEGORY_ORDER}}
               for d in range(1, ndays + 1)]
@@ -207,8 +209,9 @@ def list_rows(scope: str, period: str, sort: str = 'date_asc') -> list[dict]:
         rows = list(buckets.values())
     else:
         y, m, _ = map(int, period.split('-'))
-        base = Expense.objects.filter(date__year=y, date__month=m)
-        ndays = cal_module.monthrange(y, m)[1]
+        first, last = month_range(y, m)
+        base = Expense.objects.filter(date__range=(first, last))
+        ndays = last.day
         buckets = {}
         for d in range(1, ndays + 1):
             k = f'{y:04d}-{m:02d}-{d:02d}'
