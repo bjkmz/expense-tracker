@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.conf import settings
 from django.core.management import call_command
 from django.db import IntegrityError
@@ -404,8 +406,14 @@ class InsightsPanelTests(TestCase):
         from tracker.services.insights import insights_for
 
         ins = insights_for('day', '2026-04-15')
-        self.assertEqual(ins['cards']['top_food'], {'item': 'Rice', 'count': 12})
-        self.assertEqual(ins['cards']['top_transpo']['count'], 20)
+        self.assertEqual(
+            ins['cards']['top_food'],
+            {'item': 'Rice', 'count': 1, 'when': date(2026, 4, 1)},
+        )
+        self.assertEqual(
+            ins['cards']['top_transpo'],
+            {'item': 'Jeepney Home-Office', 'count': 1, 'when': date(2026, 4, 1)},
+        )
         self.assertEqual(float(ins['cards']['highest_income']['amount']), 99999.99)
         self.assertEqual(str(ins['cards']['highest_income']['when']), '2026-04-03')
         self.assertIsNotNone(ins['cards']['costly_consumable'])
@@ -420,6 +428,19 @@ class InsightsPanelTests(TestCase):
         self.assertEqual(ins['kind'], 'year')
         self.assertEqual(len(ins['series']), 12)
         self.assertEqual(str(ins['cards']['highest_income']['when']), '2026-04-03')
+
+    def test_month_scope_top_cards_peak_month(self):
+        from tracker.services.insights import insights_for
+
+        ins = insights_for('month', '2026-04')
+        self.assertEqual(
+            ins['cards']['top_food'],
+            {'item': 'Rice meal', 'count': 31, 'when': date(2026, 1, 1)},
+        )
+        self.assertEqual(
+            ins['cards']['top_transpo'],
+            {'item': 'Jeepney Home-Office', 'count': 31, 'when': date(2026, 1, 1)},
+        )
 
     def test_list_sort_orders(self):
         from tracker.services.insights import list_rows
@@ -838,17 +859,17 @@ class HomeInsightsTests(TestCase):
         self.assertEqual(ins['cards']['highest_income']['when'].year, hi['date__year'])
         self.assertEqual(ins['cards']['highest_income']['amount'], hi['t'])
 
-        food = (
-            Expense.objects.filter(category__name='Food')
-            .values('date__year').annotate(n=Count('id')).order_by('-n', 'date__year').first()
-        )
-        self.assertEqual(ins['cards']['top_food']['when'].year, food['date__year'])
         top_food = (
-            Expense.objects.filter(category__name='Food', date__year=food['date__year'])
+            Expense.objects.filter(category__name='Food')
             .values('item').annotate(n=Count('id')).order_by('-n', 'item').first()
         )
+        food_year = (
+            Expense.objects.filter(category__name='Food', item=top_food['item'])
+            .values('date__year').annotate(n=Count('id')).order_by('-n', 'date__year').first()
+        )
         self.assertEqual(ins['cards']['top_food']['item'], top_food['item'])
-        self.assertEqual(ins['cards']['top_food']['count'], top_food['n'])
+        self.assertEqual(ins['cards']['top_food']['when'].year, food_year['date__year'])
+        self.assertEqual(ins['cards']['top_food']['count'], food_year['n'])
 
         cons = (
             Expense.objects.filter(category__name='Consumable')
@@ -865,6 +886,12 @@ class HomeInsightsTests(TestCase):
         overall = insights_for('overall', 'all')
         self.assertEqual(overall['card_date_format'], 'M d, Y')
         self.assertEqual(str(overall['cards']['highest_income']['when']), '2026-04-03')
+        overall_top = overall['cards']['top_food']
+        self.assertNotIn('when', overall_top)
+        self.assertEqual(
+            overall_top['count'],
+            Expense.objects.filter(category__name='Food', item=overall_top['item']).count(),
+        )
 
     def test_calendar_partials_emit_cal_period_trigger(self):
         import json

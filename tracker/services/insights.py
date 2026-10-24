@@ -9,7 +9,8 @@ Conventions (per outline + user decisions):
     summary = category year totals, list = monthly rows in year.
 - Expense series exclude Income. Category division excludes Income.
 - Cards: Highest Income = max single Income record;
-  Top Food/Transpo = most frequent item name (COUNT);
+  Top Food/Transpo = most frequent item name (COUNT) plus its peak child
+  period (day/month/year) and that period's count;
   Most Costly X = single largest-amount record in that category.
 """
 from __future__ import annotations
@@ -53,6 +54,25 @@ def _costliest(qs, category_name: str):
     )
 
 
+def _top_period_cards(qs, bucket_field: str, to_date) -> dict:
+    """Most frequent item per category, then its peak child period."""
+    cards = {}
+    for key, cat in (('top_food', 'Food'), ('top_transpo', 'Transpo')):
+        top = _top_item(qs, cat)
+        if not top['count']:
+            cards[key] = {**top, 'when': None}
+            continue
+        row = (
+            qs.filter(category__name=cat, item=top['item'])
+            .values(bucket_field)
+            .annotate(n=Count('id'))
+            .order_by('-n', bucket_field)
+            .first()
+        )
+        cards[key] = {'item': top['item'], 'count': row['n'], 'when': to_date(row)}
+    return cards
+
+
 def _rollup(qs) -> dict:
     """Shared pie + category totals + net + insight cards for a scope queryset."""
     exp_qs = qs.exclude(category__name='Income')
@@ -72,12 +92,11 @@ def _rollup(qs) -> dict:
     return {'pie': pie, 'totals': totals, 'net': net, 'cards': cards}
 
 
-def _top_year(qs, category_name: str, by_count: bool = False):
-    rows = qs.filter(category__name=category_name)
-    if by_count:
-        row = rows.values('date__year').annotate(n=Count('id')).order_by('-n', 'date__year').first()
-        return row['date__year'] if row else None
-    row = rows.values('date__year').annotate(t=Sum('amount')).order_by('-t', 'date__year').first()
+def _top_year(qs, category_name: str):
+    row = (
+        qs.filter(category__name=category_name)
+        .values('date__year').annotate(t=Sum('amount')).order_by('-t', 'date__year').first()
+    )
     return row['date__year'] if row else None
 
 
@@ -91,11 +110,9 @@ def _year_cards(qs) -> dict:
     cards = {
         'highest_income': {'amount': hi_total, 'when': date(hi_year, 1, 1) if hi_year else None},
     }
-    for key, cat in (('top_food', 'Food'), ('top_transpo', 'Transpo')):
-        y = _top_year(qs, cat, by_count=True)
-        item = _top_item(qs.filter(date__year=y), cat) if y else {'item': '–', 'count': 0}
-        item['when'] = date(y, 1, 1) if y else None
-        cards[key] = item
+    cards.update(_top_period_cards(
+        qs, 'date__year', lambda r: date(r['date__year'], 1, 1)
+    ))
     for key, cat in (
         ('costly_consumable', 'Consumable'),
         ('costly_ownership', 'Ownership'),
@@ -134,6 +151,7 @@ def month_context(day_iso: str) -> dict:
               for d in range(1, ndays + 1)]
 
     ctx = _rollup(qs)
+    ctx['cards'].update(_top_period_cards(qs, 'date', lambda r: r['date']))
     ctx.update({'kind': 'month', 'year': y, 'month': m,
                 'label': date(y, m, 1).strftime('%B %Y'), 'series': series})
     return ctx
@@ -158,6 +176,9 @@ def year_context(ym: str) -> dict:
               for mo in range(1, 13)]
 
     ctx = _rollup(qs)
+    ctx['cards'].update(_top_period_cards(
+        qs, 'date__month', lambda r: date(y, r['date__month'], 1)
+    ))
     ctx.update({'kind': 'year', 'year': y, 'label': str(y), 'series': series})
     return ctx
 

@@ -12,7 +12,7 @@
       <span class="block text-sm font-semibold tabular-nums text-slate-900">{{ sub }}</span>
       {% if when %}<span class="block text-[10px] text-slate-400">{{ when|date:ins.card_date_format }}</span>{% endif %}
     {% elif right %}
-      <span class="text-xs text-slate-500">{{ right }} records{% if when %} · {{ when|date:ins.card_date_format }}{% endif %}</span>
+      <span class="text-xs text-slate-500">{{ right }} record{{ right|pluralize }}{% if when %} · {{ when|date:ins.card_date_format }}{% endif %}</span>
     {% elif when %}
       <span class="text-xs text-slate-500">{{ when|date:ins.card_date_format }}</span>
     {% else %}
