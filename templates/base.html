@@ -110,6 +110,16 @@
       if (icon) icon.classList.toggle('hidden', !!n);
       if (num) { num.classList.toggle('hidden', !n); if (n) num.textContent = n; }
     }
+    // Home Add Record CTA: once the top button scrolls above the viewport,
+    // fade the compact range-row Add button in; fade it out when scrolling back.
+    document.addEventListener('DOMContentLoaded', function () {
+      var trigger = document.querySelector('[data-add-trigger]');
+      if (!trigger || !('IntersectionObserver' in window)) return;
+      new IntersectionObserver(function (entries) {
+        var e = entries[0];
+        document.body.classList.toggle('add-past', !e.isIntersecting && e.boundingClientRect.top < 0);
+      }, {threshold: 0}).observe(trigger);
+    });
     // Insights graph: the fused graph+summary card is h-[50vh] but Plotly
     // renders at its own layout size, so relayout every figure to the chart
     // content area (inside the padded box). Runs on load, debounced resize,
@@ -189,6 +199,8 @@
     .cal-tab-active { border-color: #5ED6DC; color: #A5F3FC; background: rgba(94,214,220,0.16); }
     .cal-active { box-shadow: inset 0 0 0 2px #5ED6DC; }
     #insights-chart .hoverlayer .hovertext { filter: drop-shadow(0 6px 12px rgba(15,23,42,0.18)); }
+    [data-add-compact] { opacity: 0; visibility: hidden; transition: opacity 150ms ease, visibility 0s linear 150ms; }
+    body.add-past [data-add-compact] { opacity: 1; visibility: visible; transition: opacity 150ms ease; }
   </style>
   {% block head %}{% endblock %}
 </head>

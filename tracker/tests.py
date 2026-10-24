@@ -783,7 +783,11 @@ class HomeInsightsTests(TestCase):
         month_label = timezone.localdate().strftime('%B %Y')
         self.assertIn(f'Daily rows in {month_label}', body)  # calendar-driven default
         self.assertIn('Sort: Date ↑', body)
-        self.assertIn('sticky top-0 z-20 h-14 bg-slate-100 flex items-center gap-2 px-3 overflow-x-auto', body)
+        self.assertIn('sticky top-0 z-20 h-14 bg-slate-100 flex items-center gap-2 px-3', body)
+        self.assertIn('flex min-w-0 flex-1 items-center gap-2 overflow-x-auto', body)
+        self.assertIn('data-add-trigger', body)
+        self.assertIn('data-add-compact', body)
+        self.assertIn('+ ADD<span class="hidden md:inline">&nbsp;RECORD</span>', body)
         self.assertIn('sticky top-14', body)
         self.assertNotIn('rounded-2xl border border-slate-200 bg-white p-5 shadow-card', body)
         self.assertIn('id="insight-cards"', body)
