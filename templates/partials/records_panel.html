@@ -53,7 +53,7 @@
       {% for c in categories %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
     </select>
     <input name="amount" type="number" min="0.01" step="0.01" placeholder="Cost" required
-           class="min-w-0 w-full bg-transparent border-b border-slate-600 px-1 text-sm placeholder:text-slate-500 focus:outline-none focus:border-brand-light" />
+           class="min-w-0 w-full bg-transparent border-b border-slate-600 px-1 text-sm text-right tabular-nums placeholder:text-slate-500 focus:outline-none focus:border-brand-light" />
     <button type="submit" title="Add" class="text-brand-light hover:text-white text-xl leading-none">+</button>
   </form>
 
@@ -77,7 +77,7 @@
             {% endfor %}
           </select>
           <input name="amount" type="number" min="0.01" step="0.01" value="{{ r.amount|floatformat:2 }}"
-                 class="min-w-0 w-full bg-transparent px-1 text-xs border-b border-transparent hover:border-slate-600 focus:border-brand-light focus:outline-none" />
+                 class="min-w-0 w-full bg-transparent px-1 text-xs text-right tabular-nums border-b border-transparent hover:border-slate-600 focus:border-brand-light focus:outline-none" />
         </form>
         <details class="relative text-right">
           <summary class="cursor-pointer list-none text-slate-400 hover:text-brand-light px-1" title="Options">⋮</summary>

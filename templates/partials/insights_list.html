@@ -2,13 +2,19 @@
 {% for r in rows %}
   <div class="grid grid-cols-[28px_1fr_1fr] md:grid-cols-[28px_1fr_1fr_1fr_1fr] gap-1 items-baseline px-3 py-2 border-b border-slate-200 text-sm">
     <span class="min-w-0 text-slate-500">{{ r.label }}</span>
-    <span class="min-w-0"><span class="text-xs text-brand">Income </span>{{ r.income|floatformat:2 }}</span>
-    <span class="min-w-0"><span class="text-xs text-salmon-deep">Expense </span>{{ r.expense|floatformat:2 }}</span>
-    <span class="hidden md:block min-w-0 text-xs text-slate-500">
-      Food {{ r.cats.Food|floatformat:1 }} · Transpo {{ r.cats.Transpo|floatformat:1 }} · Cons {{ r.cats.Consumable|floatformat:1 }}
+    <div class="flex min-w-0 items-baseline justify-between gap-2">
+      <span class="text-[10px] font-medium uppercase tracking-wide text-brand">Income</span>
+      <span class="whitespace-nowrap font-semibold tabular-nums text-slate-900">{{ r.income|floatformat:"2g" }}</span>
+    </div>
+    <div class="flex min-w-0 items-baseline justify-between gap-2">
+      <span class="text-[10px] font-medium uppercase tracking-wide text-salmon-deep">Expense</span>
+      <span class="whitespace-nowrap font-semibold tabular-nums text-slate-900">{{ r.expense|floatformat:"2g" }}</span>
+    </div>
+    <span class="hidden md:block min-w-0 text-xs text-slate-500 tabular-nums">
+      Food {{ r.cats.Food|floatformat:"1g" }} · Transpo {{ r.cats.Transpo|floatformat:"1g" }} · Cons {{ r.cats.Consumable|floatformat:"1g" }}
     </span>
-    <span class="hidden md:block min-w-0 text-xs text-slate-500">
-      Own {{ r.cats.Ownership|floatformat:1 }} · Misc {{ r.cats.Miscellaneous|floatformat:1 }}
+    <span class="hidden md:block min-w-0 text-xs text-slate-500 tabular-nums">
+      Own {{ r.cats.Ownership|floatformat:"1g" }} · Misc {{ r.cats.Miscellaneous|floatformat:"1g" }}
     </span>
   </div>
 {% empty %}
