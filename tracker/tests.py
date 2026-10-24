@@ -486,7 +486,7 @@ class InsightsPanelTests(TestCase):
         default = self.client.get('/day/2026-04-15/').content.decode()
         self.assertIn('Sort: Date ↑', default)
         self.assertIn('Daily rows in April 2026', default)
-        self.assertIn('mt-12 flex items-center justify-end', body)  # breathing gap above rows bar
+        self.assertIn('flex items-center justify-end gap-2 px-5 py-4', body)
 
     def test_list_rows_keep_zero_value_periods(self):
         from decimal import Decimal
@@ -783,12 +783,19 @@ class HomeInsightsTests(TestCase):
         month_label = timezone.localdate().strftime('%B %Y')
         self.assertIn(f'Daily rows in {month_label}', body)  # calendar-driven default
         self.assertIn('Sort: Date ↑', body)
-        self.assertIn('sticky top-0 z-20 h-14 bg-white', body)
+        self.assertIn('sticky top-0 z-20 h-14 bg-slate-100 flex items-center gap-2 px-3 overflow-x-auto', body)
         self.assertIn('sticky top-14', body)
+        self.assertNotIn('rounded-2xl border border-slate-200 bg-white p-5 shadow-card', body)
+        self.assertIn('id="insight-cards"', body)
 
     def test_records_page_panel_stays_sticky(self):
         body = self.client.get('/day/2026-04-15/').content.decode()
         self.assertIn('sticky top-1', body)
+        self.assertIn(
+            'id="insights-rows" class="mx-3 mb-3 rounded-2xl border border-slate-200 bg-white shadow-card"',
+            body,
+        )
+        self.assertIn('id="insight-cards"', body)
 
     def test_home_calendar_aside_is_pinned(self):
         # Desktop calendar stays in view while the home page scrolls.

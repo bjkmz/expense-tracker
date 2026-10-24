@@ -1,5 +1,5 @@
 {# One insight card. Expects: label, value, bg; optional sub, right, when, dense, numeric. #}
-<div class="grid {% if numeric %}grid-cols-[1fr_auto]{% else %}grid-cols-[1fr_auto_1fr]{% endif %} {% if dense %}items-center px-4 py-3{% else %}items-baseline px-4 py-4{% endif %} {{ bg }} border-b border-slate-200">
+<div class="grid {% if numeric %}grid-cols-[1fr_auto]{% else %}grid-cols-[1fr_auto_1fr]{% endif %} {% if dense %}items-center px-5 py-3{% else %}items-baseline px-5 py-4{% endif %} {{ bg }}">
   <span class="text-slate-500">{{ label }}</span>
   {% if not numeric %}
     <span class="text-sm font-semibold text-center text-slate-900">{% if value %}{{ value }}{% else %}–{% endif %}</span>

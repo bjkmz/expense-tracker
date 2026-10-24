@@ -1,6 +1,6 @@
 {# Sort bar + summary rows. Re-rendered by the insights-list endpoint on every sort pick. #}
 {# Expects: rows, ins_scope, ins_period, rows_prefix, rows_label, sort_label, sort_options. #}
-<div class="mt-12 flex items-center justify-end gap-2 px-3 py-2 text-slate-500">
+<div class="flex items-center justify-end gap-2 px-5 py-4 text-slate-500 border-b border-slate-200">
   <span class="text-xs mr-auto">{{ rows_prefix }} {{ rows_label }}</span>
   <button class="border border-slate-300 rounded px-1 text-sm" title="Filter (placeholder, no function yet)" disabled>⧩</button>
   <details class="relative">
@@ -14,6 +14,6 @@
     </div>
   </details>
 </div>
-<div id="insights-list">
+<div id="insights-list" class="divide-y divide-slate-200">
   {% include "partials/insights_list.html" with rows=rows ins_scope=ins_scope %}
 </div>

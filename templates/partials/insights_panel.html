@@ -1,12 +1,12 @@
 {# Insights panel (light). Expects: ins_scope, ins_period, ins, chart_type, chart_flipped, chart_html. #}
-<div id="insights-panel" data-scope="{{ ins_scope }}" data-period="{{ ins_period }}" class="bg-white text-slate-800 flex flex-col">
+<div id="insights-panel" data-scope="{{ ins_scope }}" data-period="{{ ins_period }}" class="text-slate-800 flex flex-col">
   {# Graph + summary fused card: exactly half viewport, sticky below top bar on home, or top-1 on records #}
-  <div class="border border-slate-200 rounded bg-white {% if panel_layout == 'home' %}sticky top-14 z-10 mx-3 mb-3{% else %}sticky top-1 z-10 m-3{% endif %} h-[50vh] flex flex-col overflow-hidden">
+  <div class="border border-slate-200 rounded-2xl bg-white shadow-card {% if panel_layout == 'home' %}sticky top-14 z-10 mx-3 mb-3{% else %}sticky top-1 z-10 m-3{% endif %} h-[50vh] flex flex-col overflow-hidden">
     {# Chart box (button + figure); the toggle endpoint re-renders this same partial #}
     {% include 'partials/insights_chart.html' %}
 
     {# Summary: Category Month Totals (day) / Category Year Totals (month) #}
-    <div class="px-4 pt-1 pb-2 text-sm border-t border-slate-200">
+    <div class="p-5 text-sm border-t border-slate-200">
       <div class="flex items-baseline justify-between gap-3">
         <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">SUMMARY</span>
         <span class="text-base font-bold tabular-nums text-slate-900">{{ ins.net|floatformat:"2g" }}</span>
@@ -20,7 +20,7 @@
   </div>
 
   {# Insight cards #}
-  <div class="text-sm">
+  <div id="insight-cards" class="mx-3 mb-3 divide-y divide-slate-200 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card text-sm">
     {% include 'partials/insight_card.html' with label='Highest Income' value=ins.cards.highest_income.amount|floatformat:"2g" when=ins.cards.highest_income.when bg='bg-brand-tint' numeric=True %}
     {% include 'partials/insight_card.html' with label='Top Food' value=ins.cards.top_food.item right=ins.cards.top_food.count when=ins.cards.top_food.when bg='bg-white' %}
     {% include 'partials/insight_card.html' with label='Top Transpo' value=ins.cards.top_transpo.item right=ins.cards.top_transpo.count when=ins.cards.top_transpo.when bg='bg-slate-50' %}
@@ -30,7 +30,7 @@
   </div>
 
   {# Sort + rows: bar re-renders with the rows so the sort button shows state #}
-  <div id="insights-rows">
+  <div id="insights-rows" class="mx-3 mb-3 rounded-2xl border border-slate-200 bg-white shadow-card">
     {% include "partials/insights_rows.html" with rows=ins.rows ins_scope=ins_scope ins_period=ins_period rows_prefix=ins.rows_prefix rows_label=ins.label sort_label=ins.sort_label sort_options=ins.sort_options %}
   </div>
 </div>
