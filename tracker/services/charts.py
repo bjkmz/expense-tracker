@@ -25,6 +25,7 @@ PIE_COLORS = {
     'Miscellaneous': '#334155',
 }
 LINE_COLOR = '#0E7490'
+FONT_FAMILY = 'Inter, ui-sans-serif, system-ui, sans-serif'
 
 
 def _range_for(scope: str, period: str) -> tuple[date | None, date | None]:
@@ -107,18 +108,20 @@ def _line_html(ctx: dict) -> str:
     if not any(y):
         return '<div class="p-6 text-center text-sm text-slate-500">No expense data yet.</div>'
     custom = [[p.get('cats', {}).get(c, 0.0) for c in CATEGORY_ORDER] for p in series]
-    cat_lines = '<br>'.join(f'{c}: %{{customdata[{i}]:.2f}}' for i, c in enumerate(CATEGORY_ORDER))
-    hover = f'<b>%{{x}}</b><br>{cat_lines}<br>Total expense: %{{y:.2f}}<extra></extra>'
+    cat_lines = '<br>'.join(f'{c}: %{{customdata[{i}]:,.2f}}' for i, c in enumerate(CATEGORY_ORDER))
+    hover = f'<b>%{{x}}</b><br>{cat_lines}<br>Total expense: %{{y:,.2f}}<extra></extra>'
     fig = go.Figure(go.Scatter(x=x, y=y, mode='lines+markers',
                                line=dict(color=LINE_COLOR, width=2),
                                marker=dict(color=LINE_COLOR, size=6),
                                customdata=custom, hovertemplate=hover))
     fig.update_layout(
-        title=dict(text=title, font=dict(size=13, color='#334155')),
-        font=dict(color='#334155'),
+        title=dict(text=f'<b>{title}</b>', font=dict(size=13, color='#334155', family=FONT_FAMILY)),
+        font=dict(family=FONT_FAMILY, color='#334155', size=12),
         margin=dict(l=40, r=10, t=40, b=30),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='#E2E8F0'),
+        xaxis=dict(showgrid=False, tickfont=dict(family=FONT_FAMILY, size=11, color='#64748B')),
+        yaxis=dict(showgrid=True, gridcolor='#E2E8F0', tickformat=',.0f',
+                   tickfont=dict(family=FONT_FAMILY, size=11, color='#64748B')),
         showlegend=False,
     )
     return _fig_to_div(fig, static=False)
@@ -141,10 +144,11 @@ def _pie_html(ctx: dict) -> str:
     else:
         title = f"Month Categories Division — {ctx['label']}"
     fig = go.Figure(go.Pie(labels=labels, values=values, hole=0, marker=dict(colors=colors),
-                           textinfo='label+percent', sort=False))
+                           textinfo='label+percent', sort=False,
+                           textfont=dict(family=FONT_FAMILY, size=11)))
     fig.update_layout(
-        title=dict(text=title, font=dict(size=13, color='#334155')),
-        font=dict(color='#334155'),
+        title=dict(text=f'<b>{title}</b>', font=dict(size=13, color='#334155', family=FONT_FAMILY)),
+        font=dict(family=FONT_FAMILY, color='#334155', size=12),
         margin=dict(l=10, r=10, t=40, b=10),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         showlegend=False,
