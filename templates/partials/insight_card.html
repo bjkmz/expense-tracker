@@ -1,6 +1,22 @@
-{# One insight card. Expects: label, value, bg; optional sub, right, when, dense. #}
-<div class="grid grid-cols-[1fr_auto_1fr] {% if dense %}items-center px-4 py-3{% else %}items-baseline px-4 py-4{% endif %} {{ bg }} border-b border-slate-200">
+{# One insight card. Expects: label, value, bg; optional sub, right, when, dense, numeric. #}
+<div class="grid {% if numeric %}grid-cols-[1fr_auto]{% else %}grid-cols-[1fr_auto_1fr]{% endif %} {% if dense %}items-center px-4 py-3{% else %}items-baseline px-4 py-4{% endif %} {{ bg }} border-b border-slate-200">
   <span class="text-slate-500">{{ label }}</span>
-  <span class="{% if dense %}font-medium text-xs text-center flex flex-col items-center leading-tight text-slate-900{% else %}font-medium text-center text-slate-900{% endif %}">{% if value %}{{ value }}{% else %}–{% endif %}{% if dense and sub %}<span class="text-[10px] text-slate-500 font-normal">{{ sub }}</span>{% endif %}</span>
-  <span class="text-slate-500 text-right">{% if right %}{{ right }} records{% elif when %}{{ when|date:ins.card_date_format }}{% else %}–{% endif %}</span>
+  {% if not numeric %}
+    <span class="text-sm font-semibold text-center text-slate-900">{% if value %}{{ value }}{% else %}–{% endif %}</span>
+  {% endif %}
+  <span class="text-right">
+    {% if numeric %}
+      <span class="block text-base font-bold tabular-nums text-slate-900">{% if value %}{{ value }}{% else %}–{% endif %}</span>
+      {% if when %}<span class="block text-[10px] text-slate-400">{{ when|date:ins.card_date_format }}</span>{% endif %}
+    {% elif dense and sub %}
+      <span class="block text-sm font-semibold tabular-nums text-slate-900">{{ sub }}</span>
+      {% if when %}<span class="block text-[10px] text-slate-400">{{ when|date:ins.card_date_format }}</span>{% endif %}
+    {% elif right %}
+      <span class="text-xs text-slate-500">{{ right }} records</span>
+    {% elif when %}
+      <span class="text-xs text-slate-500">{{ when|date:ins.card_date_format }}</span>
+    {% else %}
+      <span class="text-xs text-slate-500">–</span>
+    {% endif %}
+  </span>
 </div>

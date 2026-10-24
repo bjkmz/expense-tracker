@@ -593,7 +593,7 @@ class InsightsPanelTests(TestCase):
         body = r.content.decode()
         self.assertIn('insights-panel', body)
         self.assertIn('Highest Income', body)
-        self.assertIn('99999.99', body)
+        self.assertIn('99,999.99', body)
         self.assertIn('Rice', body)
         self.assertIn('insights-chart', body)
         self.assertIn('insights-list', body)
