@@ -13,10 +13,16 @@
 
   {# Summary: net + per-category totals, 0.00 if none #}
   <div class="px-4 py-3 border-b border-slate-800 text-sm">
-    <div class="font-bold">SUMMARY: <span class="font-normal">{{ net|floatformat:2 }}</span></div>
+    <div class="flex items-baseline justify-between gap-3">
+      <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">SUMMARY</span>
+      <span class="text-base font-bold tabular-nums text-white">{{ net|floatformat:"2g" }}</span>
+    </div>
     <div class="grid grid-cols-2 gap-x-4 mt-1 text-slate-300">
       {% for name, total in totals.items %}
-        <div>{{ name }}: {{ total|floatformat:2 }}</div>
+        <div class="flex items-baseline justify-between gap-2">
+          <span class="text-slate-400">{{ name }}:</span>
+          <span class="font-semibold tabular-nums text-slate-100">{{ total|floatformat:"2g" }}</span>
+        </div>
       {% endfor %}
     </div>
   </div>
