@@ -523,12 +523,21 @@ class InsightsPanelTests(TestCase):
             self.assertIn(cat, day)
         self.assertIn('Total expense', day)
         self.assertIn('99999.99', day)  # Apr 3 Income bonus rides in hover payload
+        self.assertIn('tozeroy', day)
+        self.assertIn('fillgradient', day)
+        self.assertIn('hoverlabel', day)
         year = build_chart_html('month', '2026-04', 'line')
         self.assertIn('lines+markers', year)
         self.assertIn('customdata', year)
         pie = build_chart_html('day', '2026-04-15', 'pie')
         self.assertNotIn('lines+markers', pie)
         self.assertNotIn('customdata', pie)
+        self.assertIn('"staticPlot":false', pie)
+        self.assertIn('hoverlabel', pie)
+
+    def test_chart_tooltips_have_drop_shadow(self):
+        body = self.client.get('/').content.decode()
+        self.assertIn('drop-shadow(0 6px 12px rgba(15,23,42,0.18))', body)
 
     def test_chart_cache_roundtrip_and_invalidation(self):
         import re

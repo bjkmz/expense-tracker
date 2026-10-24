@@ -4,7 +4,7 @@
   month/year range (~1ms) vs Plotly build (~50-200ms).
 - Cached files: tmp/charts/<scope>_<period>_<line|pie>.html + .meta.json
 - plotly.js loads once via CDN in base.html; fragments use include_plotlyjs=False,
-  staticPlot, transparent backgrounds, flat 2D per outline.
+  interactive hover, transparent backgrounds, flat 2D per outline.
 """
 from __future__ import annotations
 
@@ -27,6 +27,11 @@ PIE_COLORS = {
 }
 LINE_COLOR = '#0E7490'
 FONT_FAMILY = 'Inter, ui-sans-serif, system-ui, sans-serif'
+HOVERLABEL = {
+    'bgcolor': '#FFFFFF',
+    'bordercolor': '#CBD5E1',
+    'font': {'family': FONT_FAMILY, 'size': 12, 'color': '#334155'},
+}
 
 
 def _range_for(scope: str, period: str) -> tuple[date | None, date | None]:
@@ -116,13 +121,24 @@ def _line_html(ctx: dict) -> str:
     custom = [[p.get('cats', {}).get(c, 0.0) for c in CATEGORY_ORDER] for p in series]
     cat_lines = '<br>'.join(f'{c}: %{{customdata[{i}]:,.2f}}' for i, c in enumerate(CATEGORY_ORDER))
     hover = f'<b>%{{x}}</b><br>{cat_lines}<br>Total expense: %{{y:,.2f}}<extra></extra>'
-    fig = go.Figure(go.Scatter(x=x, y=y, mode='lines+markers',
-                               line=dict(color=LINE_COLOR, width=2),
-                               marker=dict(color=LINE_COLOR, size=6),
-                               customdata=custom, hovertemplate=hover))
+    fig = go.Figure(go.Scatter(
+        x=x, y=y, mode='lines+markers',
+        line=dict(color=LINE_COLOR, width=2),
+        marker=dict(color=LINE_COLOR, size=6),
+        fill='tozeroy',
+        fillgradient=dict(
+            type='vertical',
+            colorscale=[
+                (0.0, 'rgba(14,116,144,0.00)'),
+                (1.0, 'rgba(14,116,144,0.28)'),
+            ],
+        ),
+        customdata=custom, hovertemplate=hover,
+    ))
     fig.update_layout(
         title=dict(text=f'<b>{title}</b>', font=dict(size=13, color='#334155', family=FONT_FAMILY)),
         font=dict(family=FONT_FAMILY, color='#334155', size=12),
+        hoverlabel=HOVERLABEL,
         margin=dict(l=40, r=10, t=40, b=30),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         xaxis=dict(showgrid=False, tickfont=dict(family=FONT_FAMILY, size=11, color='#64748B')),
@@ -155,8 +171,9 @@ def _pie_html(ctx: dict) -> str:
     fig.update_layout(
         title=dict(text=f'<b>{title}</b>', font=dict(size=13, color='#334155', family=FONT_FAMILY)),
         font=dict(family=FONT_FAMILY, color='#334155', size=12),
+        hoverlabel=HOVERLABEL,
         margin=dict(l=10, r=10, t=40, b=10),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         showlegend=False,
     )
-    return _fig_to_div(fig)
+    return _fig_to_div(fig, static=False)
