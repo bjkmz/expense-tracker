@@ -121,12 +121,27 @@
         try { window.Plotly.relayout(gd, {width: box.clientWidth, height: box.clientHeight}); } catch (e) {}
       });
     }
-    window.addEventListener('load', fitInsightCharts);
+    // Render inert Plotly specs after page load and after HTMX swaps. HTMX does
+    // not reliably re-run inline scripts in swapped HTML, so charts render here.
+    function renderInsightCharts() {
+      if (!window.Plotly) return;
+      document.querySelectorAll('#insights-chart script.plotly-spec').forEach(function (specEl) {
+        var gd = specEl.previousElementSibling;
+        if (!gd || !gd.classList.contains('plotly-graph-div') || gd.querySelector('.plotly')) return;
+        try {
+          var spec = JSON.parse(specEl.textContent);
+          var p = window.Plotly.newPlot(gd, spec.data, spec.layout, spec.config);
+          if (p && p.then) p.then(fitInsightCharts);
+        } catch (e) {}
+      });
+      fitInsightCharts();
+    }
+    window.addEventListener('load', renderInsightCharts);
     window.addEventListener('resize', function () {
       if (_fitChartsT) clearTimeout(_fitChartsT);
       _fitChartsT = setTimeout(fitInsightCharts, 150);
     });
-    document.addEventListener('htmx:afterSettle', fitInsightCharts);
+    document.addEventListener('htmx:afterSettle', renderInsightCharts);
     // Row/sort menus: <details> never closes on outside click natively,
     // so dismiss any open menu when the pointer lands outside it. Delegated
     // on document (survives HTMX swaps); scoped to #records-list and

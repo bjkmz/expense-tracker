@@ -49,8 +49,9 @@ April-2026 anchors (Rice x12, Jeepney x20, bonus 99999.99, Cabinet spike).
   (line/pie toggle, summary, cards, sortable rows) but non-sticky, so the whole
   page scrolls. The calendar drives it: the Day tab shows that month's daily
   insights, the Month tab that year's monthly insights. A `Yearly`/`Overall`
-  button row switches to all-data views (per-year graph / per-month graph,
-  yearly rows); any calendar interaction returns to calendar-driven mode.
+  button row switches to all-data views: Yearly = per-year graph + yearly rows +
+  by-year cards; Overall = per-month graph + yearly rows + all-data record cards.
+  Any calendar interaction returns to calendar-driven mode.
 - **Calendar** — day cells show day no. + day income/expense; month cells show
   month + totals. Green = today/this month, red = expense over 5x the all-time
   average, blue = non-zero expense under 80% of the median. Click a cell to open

@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.management import call_command
 from django.db import IntegrityError
-from django.db.models import Max, Sum
+from django.db.models import Count, Max, Sum
 from django.test import TestCase, override_settings
 
 from tracker.models import Category, Expense
@@ -496,6 +496,8 @@ class InsightsPanelTests(TestCase):
         day = build_chart_html('day', '2026-04-15', 'line')
         self.assertIn('lines+markers', day)
         self.assertIn('customdata', day)
+        self.assertIn('plotly-spec', day)
+        self.assertNotIn('Plotly.newPlot', day)
         for cat in CATEGORY_ORDER:
             self.assertIn(cat, day)
         self.assertIn('Total expense', day)
@@ -799,11 +801,13 @@ class HomeInsightsTests(TestCase):
         )
         self.assertEqual(pie.status_code, 200)
         self.assertNotIn('lines+markers', pie.content.decode())
+        overall_rows = self.client.get('/partials/insights/list/', {'scope': 'overall', 'period': 'all'})
+        self.assertIn('Yearly rows across All Data', overall_rows.content.decode())
 
     def test_all_context_year_and_month_series(self):
         from django.utils import timezone
 
-        from tracker.services.insights import SORTS, all_context, list_rows
+        from tracker.services.insights import SORTS, all_context, insights_for, list_rows
 
         years = sorted(set(Expense.objects.values_list('date__year', flat=True)))
         yctx = all_context('yearly')
@@ -813,10 +817,54 @@ class HomeInsightsTests(TestCase):
         self.assertEqual(mctx['series'][-1]['label'], timezone.localdate().strftime('%b %Y'))
         rows = list_rows('yearly', 'all')
         self.assertEqual([r['label'] for r in rows], [str(y) for y in years])
-        self.assertEqual(len(list_rows('overall', 'all')), len(years))
+        overall = list_rows('overall', 'all')
+        self.assertEqual([r['label'] for r in overall], [str(y) for y in years])
+        self.assertTrue(all(r['label'].isdigit() for r in overall))
+        self.assertEqual(insights_for('yearly', 'all')['totals'], insights_for('overall', 'all')['totals'])
         self.assertIn('date_asc', SORTS)  # sort keys apply to yearly rows too
         desc = list_rows('yearly', 'all', 'income_desc')
         self.assertGreaterEqual(desc[0]['income'], desc[-1]['income'])
+
+    def test_yearly_cards_use_top_year(self):
+        from tracker.services.insights import insights_for
+
+        ins = insights_for('yearly', 'all')
+        self.assertEqual(ins['card_date_format'], 'Y')
+
+        hi = (
+            Expense.objects.filter(category__name='Income')
+            .values('date__year').annotate(t=Sum('amount')).order_by('-t', 'date__year').first()
+        )
+        self.assertEqual(ins['cards']['highest_income']['when'].year, hi['date__year'])
+        self.assertEqual(ins['cards']['highest_income']['amount'], hi['t'])
+
+        food = (
+            Expense.objects.filter(category__name='Food')
+            .values('date__year').annotate(n=Count('id')).order_by('-n', 'date__year').first()
+        )
+        self.assertEqual(ins['cards']['top_food']['when'].year, food['date__year'])
+        top_food = (
+            Expense.objects.filter(category__name='Food', date__year=food['date__year'])
+            .values('item').annotate(n=Count('id')).order_by('-n', 'item').first()
+        )
+        self.assertEqual(ins['cards']['top_food']['item'], top_food['item'])
+        self.assertEqual(ins['cards']['top_food']['count'], top_food['n'])
+
+        cons = (
+            Expense.objects.filter(category__name='Consumable')
+            .values('date__year').annotate(t=Sum('amount')).order_by('-t', 'date__year').first()
+        )
+        self.assertEqual(ins['cards']['costly_consumable']['date'].year, cons['date__year'])
+        rec = (
+            Expense.objects.filter(category__name='Consumable', date__year=cons['date__year'])
+            .order_by('-amount', '-date').first()
+        )
+        self.assertEqual(ins['cards']['costly_consumable']['item'], rec.item)
+        self.assertEqual(ins['cards']['costly_consumable']['amount'], rec.amount)
+
+        overall = insights_for('overall', 'all')
+        self.assertEqual(overall['card_date_format'], 'M d, Y')
+        self.assertEqual(str(overall['cards']['highest_income']['when']), '2026-04-03')
 
     def test_calendar_partials_emit_cal_period_trigger(self):
         import json

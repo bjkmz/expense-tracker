@@ -22,8 +22,8 @@
   {# Insight cards #}
   <div class="text-sm">
     {% include 'partials/insight_card.html' with label='Highest Income' value=ins.cards.highest_income.amount|floatformat:"2g" when=ins.cards.highest_income.when bg='bg-brand-tint' numeric=True %}
-    {% include 'partials/insight_card.html' with label='Top Food' value=ins.cards.top_food.item right=ins.cards.top_food.count bg='bg-white' %}
-    {% include 'partials/insight_card.html' with label='Top Transpo' value=ins.cards.top_transpo.item right=ins.cards.top_transpo.count bg='bg-slate-50' %}
+    {% include 'partials/insight_card.html' with label='Top Food' value=ins.cards.top_food.item right=ins.cards.top_food.count when=ins.cards.top_food.when bg='bg-white' %}
+    {% include 'partials/insight_card.html' with label='Top Transpo' value=ins.cards.top_transpo.item right=ins.cards.top_transpo.count when=ins.cards.top_transpo.when bg='bg-slate-50' %}
     {% include 'partials/insight_card.html' with label='Most Costly Consumable' value=ins.cards.costly_consumable.item sub=ins.cards.costly_consumable.amount|floatformat:"2g" when=ins.cards.costly_consumable.date bg='bg-white' dense=True %}
     {% include 'partials/insight_card.html' with label='Most Costly Ownership' value=ins.cards.costly_ownership.item sub=ins.cards.costly_ownership.amount|floatformat:"2g" when=ins.cards.costly_ownership.date bg='bg-slate-50' dense=True %}
     {% include 'partials/insight_card.html' with label='Most Costly Miscellaneous' value=ins.cards.costly_misc.item sub=ins.cards.costly_misc.amount|floatformat:"2g" when=ins.cards.costly_misc.date bg='bg-white' dense=True %}

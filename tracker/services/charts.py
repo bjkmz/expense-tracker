@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import calendar as cal_module
+import json
 from datetime import date
 
 from django.conf import settings
@@ -82,10 +83,15 @@ def build_chart_html(scope: str, period: str, kind: str = 'line', ctx: dict | No
 
 
 def _fig_to_div(fig, static: bool = True) -> str:
-    from plotly.offline import plot
+    from plotly.utils import PlotlyJSONEncoder
 
-    return plot(fig, output_type='div', include_plotlyjs=False,
-                config={'staticPlot': static, 'displayModeBar': False})
+    spec = fig.to_plotly_json()
+    spec['config'] = {'staticPlot': static, 'displayModeBar': False, 'responsive': True}
+    payload = json.dumps(spec, cls=PlotlyJSONEncoder, separators=(',', ':')).replace('<', '\\u003c')
+    return (
+        '<div class="plotly-graph-div" style="height:100%; width:100%;"></div>'
+        f'<script type="application/json" class="plotly-spec">{payload}</script>'
+    )
 
 
 def _line_html(ctx: dict) -> str:

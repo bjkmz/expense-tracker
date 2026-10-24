@@ -72,6 +72,45 @@ def _rollup(qs) -> dict:
     return {'pie': pie, 'totals': totals, 'net': net, 'cards': cards}
 
 
+def _top_year(qs, category_name: str, by_count: bool = False):
+    rows = qs.filter(category__name=category_name)
+    if by_count:
+        row = rows.values('date__year').annotate(n=Count('id')).order_by('-n', 'date__year').first()
+        return row['date__year'] if row else None
+    row = rows.values('date__year').annotate(t=Sum('amount')).order_by('-t', 'date__year').first()
+    return row['date__year'] if row else None
+
+
+def _year_cards(qs) -> dict:
+    """Cards for the Yearly view: top year per metric, not a single day record."""
+    hi_year = _top_year(qs, 'Income')
+    hi_total = (
+        qs.filter(category__name='Income', date__year=hi_year).aggregate(t=Sum('amount'))['t']
+        if hi_year else None
+    ) or Decimal('0.00')
+    cards = {
+        'highest_income': {'amount': hi_total, 'when': date(hi_year, 1, 1) if hi_year else None},
+    }
+    for key, cat in (('top_food', 'Food'), ('top_transpo', 'Transpo')):
+        y = _top_year(qs, cat, by_count=True)
+        item = _top_item(qs.filter(date__year=y), cat) if y else {'item': '–', 'count': 0}
+        item['when'] = date(y, 1, 1) if y else None
+        cards[key] = item
+    for key, cat in (
+        ('costly_consumable', 'Consumable'),
+        ('costly_ownership', 'Ownership'),
+        ('costly_misc', 'Miscellaneous'),
+    ):
+        y = _top_year(qs, cat)
+        rec = _costliest(qs.filter(date__year=y), cat) if y else None
+        cards[key] = {
+            'item': rec.item if rec else '–',
+            'amount': rec.amount if rec else Decimal('0.00'),
+            'date': date(y, 1, 1) if y else None,
+        }
+    return cards
+
+
 def month_context(day_iso: str) -> dict:
     from tracker.models import Expense
 
@@ -159,6 +198,8 @@ def all_context(granularity: str) -> dict:
                   for y, m in seq]
 
     ctx = _rollup(qs)
+    if granularity == 'yearly':
+        ctx['cards'] = _year_cards(qs)
     ctx.update({'kind': granularity, 'label': 'All Data', 'series': series})
     return ctx
 
@@ -260,7 +301,8 @@ def insights_for(scope: str, period: str, sort: str = 'date_asc') -> dict:
     ctx['sort_label'], ctx['sort_options'] = sort_menu(ctx['sort'])
     ctx['card_date_format'] = (
         'F Y' if scope == 'month'
-        else 'M d, Y' if scope in ('yearly', 'overall')
+        else 'Y' if scope == 'yearly'
+        else 'M d, Y' if scope == 'overall'
         else 'M d'
     )
     return ctx
