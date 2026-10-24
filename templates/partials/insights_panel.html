@@ -13,10 +13,7 @@
       </div>
       <div class="grid grid-cols-2 md:grid-cols-3 gap-x-4 text-slate-500">
         {% for name, total in ins.totals.items %}
-          <div class="flex items-baseline justify-between gap-2">
-            <span>{{ name }}:</span>
-            <span class="font-semibold tabular-nums text-slate-900">{{ total|floatformat:"2g" }}</span>
-          </div>
+          <div><span>{{ name }}:</span> <span class="font-semibold tabular-nums text-slate-900">{{ total|floatformat:"2g" }}</span></div>
         {% endfor %}
       </div>
     </div>
